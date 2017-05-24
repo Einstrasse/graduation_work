@@ -33,3 +33,9 @@ libtool은 컴파일된 포터블 라이브러리를 만드는 데 사용된다.
 	
 소스코드는 [github](https://github.com/iotivity/iotivity)에 공개된 소스코드를 git clone하여 받아서 사용하였다.    
 scons라는 빌드 툴을 이용하여 간단한 명령어로 빌드를 할 수 있다. i3-CPU 랩탑에서 수 분 정도 소요된다.
+
+**Executing Samples**
+
+    $ LD_LIBRARY_PATH=/your/library/path ./IotivitySample
+	
+To execute sample code, you should specify the path of shared object files. You can specify the path with enviromenta variable name "LD_LIBRARY_PATH"
