@@ -39,7 +39,7 @@ Brookstone에서 판매하는 스마트폰 연동 알람시계이다. 특별한 
 3. 알람 소리가 0db부터 100db 까지 점진적으로 커지는 크레센도식 알람을 지원한다.
 
 #### 2.4 Philips의 Wake Up Light
-![wake_up_light](images/wake_up_light.jpeg)    
+![wake_up_light](img/wake_up_light.jpeg)    
 [아마존 구매 URL](https://www.amazon.com/gp/product/B0093162RM/)    
 기존에 소리로만 깨우는 알람과는 다르게, 아침 햇살을 모방하는 방식으로 깨워주는 알람시계이다. LED만으로 깨어나지 않는다면 소리도 같이 발생하는 기능도 갖추고 있다.
 
