@@ -141,6 +141,34 @@ Scene Manager로 여러개의 장비를 제어하는 시나리오를 만든다.
 4. 리소스 컨테이너    
 프로토콜 브릿지 역할을 한다. OCF 리소스가 아닌 것들을 통합한다.
 
+#### [06-OCF 리소스 타입과 Iotivity 시뮬레이터](https://wiki.tizen.org/images/0/0b/06-OCF_Resource_Type_and_IoTivity_Simulator.pdf)    
+
+** RAML **    
+RAML(RESTful API Modeling Language)는 API 라이프사이클 설계와 공유를 쉽고 간편하게 해주는 모델링 언어이다. 공식 사이트 링크는 http://raml.org 이다.    
+RAML은 기계가 인식할 수 있는 API 설계도이며, 사람에게도 친숙하다. Nodejs, Java, .NET, 파이썬의 몇몇 언어들을 지원한다. RAML으로 CRUDN 연산 시 전송하는 패킷 내용을 정의할 수 있다. 시뮬레이션에 사용할 수도 있고, 응답의 타당성을 검증할 수 있다.    
+
+** CRUDN 연산 응답 코드 **    
+리소스 타입의 정의외 허용된 CRUDN 연산에 따라서 리소스는 생성되거나 변경될 수 있다. CRUDN 연산에 따라서 다른 의미를 갖는 다른 응답코드가 올 수 있다.    
+
+| 응답 코드 | 의미 |
+|:--------|:--------|
+| 200 | 변경이 잘 이루어짐 |
+| 201 | CREATE 연산에 의해 리소스가 성공적으로 생성되었고, 응답 내용은 생성된 리소스의 URL이다.|
+| 204 | 모든 것이 잘 동작했고, 응답 내용은 없다. |
+| 403 | RETRIEVE 연산의 경우, 서버는 해당 요청에 대하여 지원하지 않는다. 혹은 서버가 어떤 문제로 인하여 CREATE나 UPDATE 연산을 수행할 수 없다.|    
+
+** OIC에서 정의하는 리소스 타입들 **    
+62개의 리소스 타입이 정의되어 있다.    
+[OCF Resource Type Spec v1.3.0](https://openconnectivity.org/specs/OCF_Resource_Type_Specification_v1.3.0.pdf)    
+[OIC Resource Type Spec v.1.1.0](https://openconnectivity.org/specs/OIC_Resource_Type_Specification_v1.1.0.pdf)    
+
+** IoTivity Simulator **    
+[IoTivity 위키의 시뮬레이터 설명](https://wiki.iotivity.org/iotivity_simulator)    
+[IoTivity 시뮬레이터 유저 가이드](https://wiki.iotivity.org/iotivity_tool_guide)    
+실제 장비들을 통해서 서비스 구성을 하지 않더라도, IoTivity Simulator를 통해서 설계한 RESTful API와 상황들을 테스트해볼 수 있다. 시뮬레이터는 크게 두가지 기능을 제공한다.
+- 서비스 제공자
+- 클라이언트 컨트롤러
+시뮬레이터는 Eclipse 플러그인 형태를 띤다.
 
 ## 3.4 작업
 ### 3.4.1 라즈베리파이 작업
