@@ -126,7 +126,7 @@ RESTful 모델에서 사용하는 동작은 CRUDN이며, 이는 각각 Create, R
 
 JSON 스키마로 프로퍼티들을 나타내며, RAML(RESTful API Modeling Language)로 요청, 응답의 형태를 나타낸다.
 
-** > IoTivity **    
+**IoTivity**    
 크로스 플랫폼 프레임워크이며, 아두이노와 같은 저사양의 장비들을 지원한다. 그리고 다양한 언어에 API를 제공한다.    
 IoTivity가 서비스 레벨에서 제공하는 것들은 다음과 같다.
 1. 장비 관리    
@@ -157,18 +157,18 @@ RAML은 기계가 인식할 수 있는 API 설계도이며, 사람에게도 친�
 | 204 | 모든 것이 잘 동작했고, 응답 내용은 없다. |
 | 403 | RETRIEVE 연산의 경우, 서버는 해당 요청에 대하여 지원하지 않는다. 혹은 서버가 어떤 문제로 인하여 CREATE나 UPDATE 연산을 수행할 수 없다.|    
 
-** OIC에서 정의하는 리소스 타입들 **    
+**OIC에서 정의하는 리소스 타입들**    
 62개의 리소스 타입이 정의되어 있다.    
 [OCF Resource Type Spec v1.3.0](https://openconnectivity.org/specs/OCF_Resource_Type_Specification_v1.3.0.pdf)    
 [OIC Resource Type Spec v.1.1.0](https://openconnectivity.org/specs/OIC_Resource_Type_Specification_v1.1.0.pdf)    
 
-** IoTivity Simulator **    
+**IoTivity Simulator**    
 [IoTivity 위키의 시뮬레이터 설명](https://wiki.iotivity.org/iotivity_simulator)    
 [IoTivity 시뮬레이터 유저 가이드](https://wiki.iotivity.org/iotivity_tool_guide)    
 실제 장비들을 통해서 서비스 구성을 하지 않더라도, IoTivity Simulator를 통해서 설계한 RESTful API와 상황들을 테스트해볼 수 있다. 시뮬레이터는 크게 두가지 기능을 제공한다.
 - 서비스 제공자
-- 클라이언트 컨트롤러
-시뮬레이터는 Eclipse 플러그인 형태를 띤다.
+- 클라이언트 컨트롤러    
+시뮬레이터는 Eclipse 플러그인 형태를 띤다. 그리고 제공하는 피쳐가 리눅스 플랫폼에서 자바 API를 통한 SDK 지원이므로, 시뮬레이터 관련 작업은 리눅스에서 진행하도록 한다. 리눅스는 Vmware에 설치된 Ubuntu 16.04를 사용한다.
 
 ## 3.4 작업
 ### 3.4.1 라즈베리파이 작업
@@ -186,6 +186,48 @@ Lite버전과 일반 버전이 있는데 일반 버전을 다운로드 하였다
 ### 3.4.2 아두이노 작업
 
 ### 3.4.3 IoTivity 작업
+
+** IoTivity 시뮬레이터 구동 환경 구축 **    
+
+IoTivity 시뮬레이터는 리눅스에서만 지원이 된다. 현재 작업용 PC의 OS는 Windows 10이므로, 리눅스 작업은 가상머신에서 실시하도록 한다. 가상머신의 Guest OS는 Ubuntu 16.04 LTS 배포판을 이용하기로 한다.    
+
+IoTivity 시뮬레이터는 이클립스 플러그인 형태를 띠므로 일단 이클립스 먼저 설치하기로 한다.
+이클립스는 이클립스 제단에서 주도적으로 진행하는 오픈소스 IDE 프로젝트이다. 자바로 작성되었으며, 오픈소스지만 강력한 기능을 제공한다. 또한 Windows, Linux, Mac의 플랫폼에서 동작한다.    
+
+시뮬레이터 설치와 관련된 링크는 다음과 같다.    
+[IoTivity 시뮬레이터 유저 가이드](https://wiki.iotivity.org/iotivity_tool_guide)      
+
+위 링크의 문서에 따르면 리눅스 플랫폼에서 4.4버전 이상의 이클립스가 필요하다.    
+이클립스를 설치하기에 앞서서 JDK가 설치되어 있지 않다면, JDK를 설치한다. OpenJDK 7버전 혹은 Oracle JDK를 설치하면 된다.    
+
+apt 패키지 매니저를 통해서 이클립스를 설치할 경우, 4.4 버전 이상의 최신 버전이 설치가 되지 않으므로 이클립스 공식 사이트를 방문하여 다운로드를 받는다. 만약 패키지 매니저를 통해 설치를 했다면 다음 명령어를 통해 삭제한다.
+```
+	sudo apt-get --purge remove eclipse
+```
+
+이클립스 다운로드 링크는 다음과 같다.    
+[이클립스 다운로드 링크](http://www.eclipse.org/downloads)    
+
+리눅스 64bit용 설치 파일을 다운로드하면 tar.gz 파일이 나타나게 된다.    
+다음 명령어로 압축을 풀어준다.
+```
+	tar xvf [tar.gz file name]
+```
+압축을 풀면 폴더 안에 `eclipse-inst`라는 ELF파일이 있다. 실행시켜서 이클립스를 설치할 수 있다.
+Java IDE로 기본 설정대로 설치한다.
+
+그리고 Eclipse를 실행하여 IoTivity Simulator 플러그인을 설치한다.
+메뉴의 `Help > Install New Software`를 선택한 뒤, `Work with` 항목에 다음 URL 중 하나를 입력한다.    
+* https://downloads.iotivity.org/tools/simulator/latest
+* https://mirrors.kernel.org/iotivity/tools/simulator/latest
+* ftp://mirrors.kernel.org/iotivity/tools/simulator/latest    
+매뉴 중 `Group itesm by category`를 체크 해제하고, `Simulator`를 선택 후 `Next`를 누른다.
+이후 나타나는 Simulator를 설치한다.    
+License에 동의한다고 체크한다.    
+Unsigned contents warning이 뜰 경우 OK를 눌러 계속 진행한다.    
+이후 Restart에 대한 내용이 나오면 Yes를 누른다.
+
+시뮬레이터 플러그인이 설치된 후에, 시뮬레이터를 사용하려면 `Open Perspective`를 눌러서 `Client Controller`나 `Service Provider`를 눌러서 진행하면 된다. 시뮬레이터는 두개의 관점으로 이루어져 있는데 IoTivity의 클라이언트 관점과 IoTivity 서버의 관점으로 이루어져 있다.
 
 IoTivity를 활용하여 프로젝트가 진행 될 것이므로, IoTivity를 빌드 및 실행해보아야 한다.    
 IoTivity 빌드는 우분투 16.04 환경에서 진행한다.    
