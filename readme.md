@@ -172,6 +172,17 @@ RAML은 기계가 인식할 수 있는 API 설계도이며, 사람에게도 친�
 
 ## 3.4 작업
 ### 3.4.1 라즈베리파이 작업
+구매한 라즈베리파이에 운영체제를 업로드 해야한다. 업로드할 운영체제 이미지는 라즈베리파이에 적합하게 커스터마이징된 데비안 계열 리눅스인 라즈비안이다. 라즈비안은 다음 링크에서 다운로드 받을 수 있다.     
+[라즈비안 다운로드 사이트 링크](https://www.raspberrypi.org/downloads/raspbian/)    
+[라즈비안 다운로드 링크](http://director.downloads.raspberrypi.org/raspbian/images/raspbian-2017-12-01/2017-11-29-raspbian-stretch.zip)    
+Lite버전과 일반 버전이 있는데 일반 버전을 다운로드 하였다. 다운받은 이미지 데이터를 SD카드에 써야 하는데, 이 방법에 대한 라즈베리 파이 공식 홈페이지에서 제공하는 가이드 링크는 다음과 같다.    
+[라즈비안 이미징 방법 링크](https://www.raspberrypi.org/documentation/installation/installing-images/README.md)    
+윈도우 계열 OS에서 이미징 작업을 할 때에는 Win32 Disk Imager를 사용하면 편리하다. 해당 소프트웨어는 다음 링크에서 다운받을 수 있다.    
+[Win32 Disk Imager SourceForge 링크](https://www.raspberrypi.org/documentation/installation/installing-images/README.md)    
+
+위 절차를 통해서 라즈베리파이의 SD카드에 라즈비안 OS 이미징 작업을 완료하였다. 입력장치로 LED가 포함된 기계식 키보드를 사용할 시, 부족한 전원량으로 인하여 가끔씩 라즈베리파이가 꺼지는 현상이 있었다. 이러한 현상을 방지하기 위해서 LED가 없는 키보드를 사용하거나, Telnet이나 SSH와 같은 원격 쉘을 이용한 작업을 할 것이 권장된다.    
+
+라즈베리파이의 기본 유저 이름은 "pi"이고 초기에는 아무런 인증 없이 사용자 로그인이 되었다. 그리고 sudo su 명령어를 통해서 인증 없이 루트 권한을 취득할 수 있다. 이 상태에서 초기 패스워드를 지정해 주었다.
 ### 3.4.2 아두이노 작업
 
 ### 3.4.3 IoTivity 작업
