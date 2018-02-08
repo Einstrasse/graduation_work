@@ -1,6 +1,10 @@
 # graduation_work
 
-# 1. 주제
+# 0. 목차
+
+[1. 주제](#m1)
+
+# 1. 주제 <a name="m1" />
 주제: ```IoTivity를 활용한 스마트 알람 시스템 구축```
 
 가정에서 유용하게 사용할 수 있는 스마트 알람 시스템을 구축하는 것이 졸업작품의 주제이다. 사용할 주요 장비들로는 라즈베리파이, 아두이노, IoTivity 등이 있다.
@@ -226,6 +230,24 @@ Java IDE로 기본 설정대로 설치한다.
 License에 동의한다고 체크한다.    
 Unsigned contents warning이 뜰 경우 OK를 눌러 계속 진행한다.    
 이후 Restart에 대한 내용이 나오면 Yes를 누른다.
+
+그리고 이클립스를 런처 바로가기에 등록하기 위해 다음 명령어로 gedit을 연다
+```
+	gedit ~/.local/share/application/eclipse.desktop
+```
+그리고 다음 항목들을 입력한다.
+```
+[Desktop Entry]
+Name=Eclipse
+Type=Application
+Exec=/home/USERNAME/eclipse/java-oxygen/eclipse/eclipse
+Terminal=false
+Icon=/home/USERNAME/eclipse/java-oxygen/eclipse/icon.xpm
+Comment=Java IDE
+NoDisplay=false
+Categories=Development;IDE;
+Name[en]=Eclipse
+```
 
 시뮬레이터 플러그인이 설치된 후에, 시뮬레이터를 사용하려면 `Open Perspective`를 눌러서 `Client Controller`나 `Service Provider`를 눌러서 진행하면 된다. 시뮬레이터는 두개의 관점으로 이루어져 있는데 IoTivity의 클라이언트 관점과 IoTivity 서버의 관점으로 이루어져 있다.
 
