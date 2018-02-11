@@ -5,7 +5,7 @@
 [1. 주제](#m1)    
 [2. 유사 제품 사례](#m2)    
 [　2.1 스마트 알람 Bonjour](#m2.1)    
-[　2.2 스마트 알람 Kello](#m2.2)
+[　2.2 스마트 알람 Kello](#m2.2)    
 [　2.3 Brookstone 스마트폰 앱 연동 알람시계](#m2.3)    
 [　2.4 Philips의 Wake Up Light](#m2.4)    
 [　2.5 카펫 알람](#m2.5)    
@@ -18,6 +18,8 @@
 [　　3.3.3 IoTivity 스터디](#m3.3.3)    
 [　　　3.3.3.5 OCF표준과 IoTivity  개요](#m3.3.3.5)    
 [　　　3.3.3.6 OCF 시소스 타입과 IoTivity 시뮬레이터](#m3.3.3.6)    
+[　　　3.3.3.p3 IoTivity 빌드](#m3.3.3.p3)
+[　　　3.3.3.p5 IoTivity 심플 서버와 심플 클라이언트](#m3.3.3.p5)    
 [　3.4 작업](#m3.4)    
 [　　3.4.1 라즈베리파이 작업](#m3.4.1)    
 [　　3.4.2 아두이노 작업](#m3.4.2)    
@@ -32,6 +34,7 @@
 가정에서 유용하게 사용할 수 있는 스마트 알람 시스템을 구축하는 것이 졸업작품의 주제이다. 사용할 주요 장비들로는 라즈베리파이, 아두이노, IoTivity 등이 있다.
 
 <a name="m2" />
+
 # 2. 유사 제품 사례
 
 <a name="m2.1" />
@@ -229,6 +232,26 @@ RAML은 기계가 인식할 수 있는 API 설계도이며, 사람에게도 친�
 - 클라이언트 컨트롤러    
 시뮬레이터는 Eclipse 플러그인 형태를 띤다. 그리고 제공하는 피쳐가 리눅스 플랫폼에서 자바 API를 통한 SDK 지원이므로, 시뮬레이터 관련 작업은 리눅스에서 진행하도록 한다. 리눅스는 Vmware에 설치된 Ubuntu 16.04를 사용한다.
 
+<a name="m3.3.3.p3" />
+
+#### [실습-03 IoTivity 빌드](https://wiki.tizen.org/images/e/ef/Practice-03-Building_IoTivity.pdf)    
+
+
+IoTivity는 멀티 플랫폼을 지원한다. x86, x86_64, arm-v7a, arm, arm64 CPU 아키텍쳐를 지원하고, 운영체제는 Linux, 안드로이드, 타이젠, 아두이노를 지원한다.    
+IoTivity의 기본 빌드 툴은 Scon으로 멀티 플랫폼의 크로스 빌드를 지원한다. 명령어는 다음과 같은 형식으로 사용한다.
+
+	$ scons TARGET_ARCH=arm TARGET_OS=android
+
+
+<a name="m3.3.3.p5" />
+
+#### [실습-05 IoTivity 심플 서버와 심플클라이언트](https://wiki.tizen.org/images/7/71/Practice-05-Simple_Server_and_Simple_Client.pdf)
+
+IoTivity에서 센서나 구동기같은 엔티티는 OCF 리소스 모델에 따라 리소스로써 다루어진다. 각각의 리소스는 장치 타입, CRUDN 연산, URI 정보를 갖는다. 그리고 유저는 리소스를 URI와 RESTful 인터페이스로 접근할 수 있다.    
+IoTivity 네트워크 토폴로지에서 OCF 서버는 CRUDN 요청을 처리한다. 그리고 OCF 클라이언트는 리소스를 찾고 CRUDN 요청을 보낸다.    
+여기서 만들어볼 심플 서버, 클라이언트 구성은 다음과 같다. 서버는 온도, 습도 센서이다. 클라이언트는 안드로이드에 설치된 어플리케이션이다. 해당 소스의 레포지토리는 다음과 같다.    
+https://github.com/gudbooy/IoTivity_Sample_Things.git
+
 <a name="m3.4" />
 
 ## 3.4 작업
@@ -296,24 +319,6 @@ License에 동의한다고 체크한다.
 Unsigned contents warning이 뜰 경우 OK를 눌러 계속 진행한다.    
 이후 Restart에 대한 내용이 나오면 Yes를 누른다.
 
-그리고 이클립스를 런처 바로가기에 등록하기 위해 다음 명령어로 gedit을 연다
-```
-	gedit ~/.local/share/application/eclipse.desktop
-```
-그리고 다음 항목들을 입력한다.
-```
-[Desktop Entry]
-Name=Eclipse
-Type=Application
-Exec=/home/USERNAME/eclipse/java-oxygen/eclipse/eclipse
-Terminal=false
-Icon=/home/USERNAME/eclipse/java-oxygen/eclipse/icon.xpm
-Comment=Java IDE
-NoDisplay=false
-Categories=Development;IDE;
-Name[en]=Eclipse
-```
-
 시뮬레이터 플러그인이 설치된 후에, 시뮬레이터를 사용하려면 `Open Perspective`를 눌러서 `Client Controller`나 `Service Provider`를 눌러서 진행하면 된다. 시뮬레이터는 두개의 관점으로 이루어져 있는데 IoTivity의 클라이언트 관점과 IoTivity 서버의 관점으로 이루어져 있다.
 
 IoTivity를 활용하여 프로젝트가 진행 될 것이므로, IoTivity를 빌드 및 실행해보아야 한다.    
@@ -323,7 +328,7 @@ IoTivity 빌드는 우분투 16.04 환경에서 진행한다.
 
 **빌드 환경 구축 커맨드**
 
-    $ sudo apt-get install \
+    $ sudo apt-get -y install \
     build-essential git scons libtool autoconf \
 	valgrind doxygen wget zip
 	
@@ -341,15 +346,39 @@ libtool은 컴파일된 포터블 라이브러리를 만드는 데 사용된다.
 	libboost-dev libboost-program-options-dev libboost-thread-dev \
 	uuid-dev libexpat1-dev libglib2.0-dev libsqlite3-dev libcurl4-gnutls-dev
 	
-**빌드**
+**의존 라이브러리 설치(tinycbor, crypto lib)**    
 
+	$ git clone https://github.com/01org/tinycbor.git extlibs/tinycbor/tinycbor
+	$ git clone https://github.com/ARMmbed/mbedtls.git extlibs/mbedtls/mbedtls -b mbedtls-2.4.2
+	
+**빌드**    
+소스코드 받아오기
+
+    $ git clone https://github.com/iotivity/iotivity
+	
+릴리즈 버전 바이너리 빌드 커맨드
+	
     $ scons
+	
+디버깅 바이너리 빌드 커맨드
+
+    $ scons RELEASE=false
+	
+Verbose 모드
+
+    $ scons VERBOSE=true
+	
+클리어
+
+    $ scons -c
 	
 소스코드는 [github](https://github.com/iotivity/iotivity)에 공개된 소스코드를 git clone하여 받아서 사용하였다.    
 scons라는 빌드 툴을 이용하여 간단한 명령어로 빌드를 할 수 있다. i3-CPU 랩탑에서 수 분 정도 소요된다.
 
 **샘플 실행**
 
-    $ LD_LIBRARY_PATH=/your/library/path ./IotivitySample
+    $ export LD_LIRBRARY_PATH=<iotivity>/out/linux/x86_64/release
+
+    $ ./IotivitySample
 	
 샘플 코드를 실행하기 위해서는 공유 라이브러리(.so) 파일의 경로를 지정해주어야 한다. 인라인에서 "LD_LIBRARY_PATH"라는 환경변수의 설정을 통하여 라이브러리 위치를 지정해줄 수 있다.
