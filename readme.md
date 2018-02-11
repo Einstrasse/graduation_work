@@ -242,6 +242,44 @@ IoTivity의 기본 빌드 툴은 Scon으로 멀티 플랫폼의 크로스 빌드
 
 	$ scons TARGET_ARCH=arm TARGET_OS=android
 
+IoTivity gerrit이라는 곳에서 소스코드를 받을 수 있다. 소스코드를 받기 이전에 IoTivity Linux foundation에 회원가입을 한다. 이후 다음 링크로 이동해서 username으로 로그인을 해야 한다.
+
+	https://gerrit.iotivity.org/gerrit/
+
+그리고 소스코드를 내려받을 git 클라이언트 사이드에서 다음 명령어를 이용해서 공개키-비밀키를 생성한다.
+
+	$ ssh-keygen
+
+일부 질문과 답변을 응답한다. 그러면 클라이언트의 공개키-비밀키가 생성되게 된다. 그리고 다음 명령어의 표준 출력값을 gerrit 웹 사이트의 SSH-public key form에 붙여넣는다.
+
+	 $ cat ~/.ssh/id_rsa.pub
+
+그리고 클라이언트에서 ssh configuration을 설정해준다.
+	
+	$ gedit ~/.ssh/config
+	
+	
+다음과 같은 양식으로 붙여넣는다. user 항목에는 gerrit ID값을 넣는다.
+
+```
+Host gerrit.iotivity.org
+	Hostname gerrit.iotivity.org
+	IdentityFile ~/.ssh/id_rsa
+	User hangil
+	Port 29418
+```
+
+그리고 다음 명령어로 git clone을 받는다.
+
+	$ git clone ssh://gerrit.iotivity.org/iotivity
+	
+그리고 의존 라이브러리도 같이 받는다.(tinycbor)
+
+	$ git clone https://github.com/01org/tinycbor.git extlibs/tinycbor/tinycbor
+	$ git clone https://github.com/ARMmbed/mbedtls.git extlibs/mbedtls/mbedtls -b mbedtls-2.4.2
+
+scons를 이용해서 빌드할 수 있다.
+
 
 <a name="m3.3.3.p5" />
 
@@ -251,6 +289,20 @@ IoTivity에서 센서나 구동기같은 엔티티는 OCF 리소스 모델에 �
 IoTivity 네트워크 토폴로지에서 OCF 서버는 CRUDN 요청을 처리한다. 그리고 OCF 클라이언트는 리소스를 찾고 CRUDN 요청을 보낸다.    
 여기서 만들어볼 심플 서버, 클라이언트 구성은 다음과 같다. 서버는 온도, 습도 센서이다. 클라이언트는 안드로이드에 설치된 어플리케이션이다. 해당 소스의 레포지토리는 다음과 같다.    
 https://github.com/gudbooy/IoTivity_Sample_Things.git
+
+해당 리포지토리의 readme 파일에는 다음과 같은 프로세스로 실시하라는 간략한 설명이 있다.
+
+```
+$ cd {iotivity_dir}/resource/examples
+$ git clone https://github.com/gudbooy/IoTivity_Sample_Things.git
+$ vim {iotivity_dir}/resource/examples/SConscript
+Insert SConscript('IoTivity_Sample_Things/SConscript') in example's SConscript
+```
+
+IoTivity 프로젝트 디렉토리에 해당 Simple Server, Client 프로젝트를 클론한 뒤, SConscript에 스크립트를 삽입하라고 되어있다.    
+하지만 여기서 스크립트를 마지막 줄에 삽입한 이후 다시 빌드를 시도하면 제대로 되지않는다. 서브 프로젝트에서 scons로 빌드를 시도할 시, SConstruct를 찾지 못하고, 따라서 SConstruct가 있는 IoTivity 프로젝트 루트에서 시도를 할 시, thread_env를 찾지 못한다는 알 수 없는 에러가 발생하면서 빌드가 되지 않는다. 아직 원인은 찾지 못하였고 따라서 해결하지도 못했다.
+
+
 
 <a name="m3.4" />
 
