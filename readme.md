@@ -20,6 +20,8 @@
 [　　　3.3.3.6 OCF 시소스 타입과 IoTivity 시뮬레이터](#m3.3.3.6)    
 [　　　3.3.3.p3 IoTivity 빌드](#m3.3.3.p3)
 [　　　3.3.3.p5 IoTivity 심플 서버와 심플 클라이언트](#m3.3.3.p5)    
+[　　3.3.4 관련 툴 스터디](#m3.3.4)    
+[　　　3.3.4.1 SCon](#m3.3.4.1)    
 [　3.4 작업](#m3.4)    
 [　　3.4.1 라즈베리파이 작업](#m3.4.1)    
 [　　3.4.2 아두이노 작업](#m3.4.2)    
@@ -300,8 +302,30 @@ Insert SConscript('IoTivity_Sample_Things/SConscript') in example's SConscript
 ```
 
 IoTivity 프로젝트 디렉토리에 해당 Simple Server, Client 프로젝트를 클론한 뒤, SConscript에 스크립트를 삽입하라고 되어있다.    
-하지만 여기서 스크립트를 마지막 줄에 삽입한 이후 다시 빌드를 시도하면 제대로 되지않는다. 서브 프로젝트에서 scons로 빌드를 시도할 시, SConstruct를 찾지 못하고, 따라서 SConstruct가 있는 IoTivity 프로젝트 루트에서 시도를 할 시, thread_env를 찾지 못한다는 알 수 없는 에러가 발생하면서 빌드가 되지 않는다. 아직 원인은 찾지 못하였고 따라서 해결하지도 못했다.
+하지만 여기서 스크립트를 마지막 줄에 삽입한 이후 다시 빌드를 시도하면 제대로 되지않는다. 서브 프로젝트에서 scons로 빌드를 시도할 시, SConstruct를 찾지 못하고, 따라서 SConstruct가 있는 IoTivity 프로젝트 루트에서 시도를 할 시, thread_env를 찾지 못한다는 알 수 없는 에러가 발생하면서 빌드가 되지 않는다. 아직 원인은 찾지 못하였고 따라서 해결하지도 못했다.    
+해당 예제 코드를 참조하지 않더라도 IoTivity 프로젝트 자체에서 제공하는 예제 코드들이 있으므로 해당 예제 코드를 통해서 학습을 진행하기로 결정했다.
 
+
+<a name="m3.3.4" />    
+
+### 3.3.4 관련 툴 스터디
+
+<a name="m3.3.4.1" />
+
+#### 3.3.4.1 SCons
+[공식 문서 링크](http://scons.org/doc/production/HTML/scons-user.html)    
+SCons는 Software Construction Tool의 약자로, 크로스 플랫폼 빌드 툴이다. 고전적인 빌드 툴인 Make와는 다르게 기본적으로 C, C++, D, Java, Fortra, Yacc, Lex, Qt, SWIG, TeX와 같은 프로그램밍 언어와 문서들을 지원하고, 유저가 다른 언어에 대한 빌드를 원할 때에는 유저가 빌더를 정의해서 확장이 가능하다. 또한 다양한 OS, CPU 아키텍쳐를 아우르는 크로스 플랫폼 빌드를 지원한다.
+구현은 실제로 파이썬으로 되어있으며, 파이썬과 유사한 SConstruct와 SConscript라는 파이썬 스크립트로 빌드 환경과 방식 등을 기술한다.    
+Make와는 다르게 쉘에 있는 환경을 그대로 가져오지 않으며, 스콘스크립트 내에서 환경을 정의하고 다른 스콘스크립트로 주고받을 수 있도록 되어있다.
+
+**[환경 설정](http://scons.org/doc/production/HTML/scons-user.html#chap-environments)**    
+환경이란 프로그램 실행에 영향을 끼칠 수 있는 모든 값들의 집합으로 정의된다. SCons에서는 이러한 환경을 3가지로 분류한다. SCons에서 분류되는 환경의 종류는 다음과 같다.
+1. External 환경    
+유저가 SCons를 실행할 때의 환경을 뜻한다. 스콘 스클비트에서는 파이썬의 os.environ에 저장된 변수들과 관계가 있다.
+2. Construction 환경    
+Construction 환경은 SCons이 빌드를 하는 도중의 환경으로, 스콘스크립트 내에 생성된 객체들에 그 환경이 정의되어 있다. Construction 환경에는 타겟을 빌드하기 위해서 어떠한 행위를 해야하는지, 그리고 어떤 소스로 부터 빌드가 되어야 되는지도 포함된다. SCons의 강력한 기능 중 하나는 여러개의 Construction 환경을 만들 수 있다는 것이다. 기존의 환경을 복제하는 것도 가능하므로 기존 환경을 복제한 뒤 입맞에 맞게 바꾸어서 사용할 수 있다는 뜻이다.
+3. Execution 환경    
+Execution 환경은 SCons가 타겟을 빌드하기 위해 외부 커맨드(컴파일러나 링커)를 실행할 때 사용되는 값들이다. 이 값들은 External 환경과는 다르다는 것을 알고 있어야 한다.
 
 
 <a name="m3.4" />
@@ -434,3 +458,39 @@ scons라는 빌드 툴을 이용하여 간단한 명령어로 빌드를 할 수 
     $ ./IotivitySample
 	
 샘플 코드를 실행하기 위해서는 공유 라이브러리(.so) 파일의 경로를 지정해주어야 한다. 인라인에서 "LD_LIBRARY_PATH"라는 환경변수의 설정을 통하여 라이브러리 위치를 지정해줄 수 있다.
+
+**bash 쉘 환경변수 고정 설정**    
+LD_LIBRARY_PATH 환경변수를 고정적으로 설정하기 위해서는 /etc/bash.bashrc 파일에 값을 지정해주어야 한다. 다음 명령어를 실행하여 설정할 수 있다.
+
+```
+$ sudo echo "export LD_LIBRARY_PATH=/home/bobgil/Desktop/iotivity/out/linux/x86_64/release:$LD_LIBRARY_PATH" >> /etc/bash.bashrc
+```
+위 명령어를 적용한 후 새로 여는 터미널은 해당 환경변수가 설정된 채로 생성되게 된다. 
+해당 환경변수가 제대로 설정되었는지 확인하고 싶으면 다음 두가지 명령어 중 하나로 확인할 수 있다.
+```
+$ echo $LD_LIBRARY_PATH
+```
+혹은 다음 명령어로도 확인 가능하다.
+```
+$ env | grep LD_LIBRARY_PATH
+```
+env 명령어에 grep을 조합해서 사용하는 경우 LD_LIBRARY_PATH 내용을 전부 치지 않고, LD_ 정도의 해당 변수명의 부분문자열만 입력하여도 확인이 가능하다는 장점이 있다.    
+
+bashrc 파일에 입력한 환경변수 설정은 현재 열려있는 터미널에는 곧바로 적용되지 않는다. 만약 이미 열려있는 터미널에도 해당 설정을 적용하고 싶으면 다음 명령어를 입력하면 된다.
+
+```
+$ source /etc/bash.bashrc
+```
+
+IoTivity 샘플 코드에 대한 내용은 다음 링크에 담겨있다.    
+[IoTivity Examples](https://wiki.iotivity.org/examples)    
+
+샘플 코드 중 리소스 디스커버리 관련 샘플 소스코드를 확인해보자. 해당 소스코드는 다음 경로에 존재한다.    
+`iotivity/out/linux/x86_64/release/resource/examples`    
+사실 일반화되면 해당 경로는 다음과 같다.    
+`[ProjectDir]/[TargetOS]/[TargetArch]/[BuildMode]/resource/examples`
+
+해당 디랙터리에 simpleclient 바이너리와 simpleserver 바이너리가 존재한다. 각각의 바이너리를 각자 다른 터미널에서 로컬 환경에서 구동해보면 어떤식으로 동작하는지 확인할 수 있다. 해당 예제를 인자 없이 실행하면, 다음과 같은 동작을 보인다.    
+1. 서버는 클라이언트 요청이 오기 전까지는 Idle한 상태로 있는다. 클라이언트 요청이 오면 그에 맞는 응답을 준다.
+2. 클라이언트는 실행되면 리소스(서버)를 찾는다. 리소스를 찾고 나서 Notify 요청을 통해서 Observer에 등록한다. 이후 주기적으로 서버로부터 상태를 응답받는다.    
+3. 이후 등록된 옵저버가 사라지면, 서버는 다시 Idle한 상태가 된다.
