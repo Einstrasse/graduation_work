@@ -18,7 +18,8 @@
 [　　3.3.3 IoTivity 스터디](#m3.3.3)    
 [　　　3.3.3.5 OCF표준과 IoTivity  개요](#m3.3.3.5)    
 [　　　3.3.3.6 OCF 시소스 타입과 IoTivity 시뮬레이터](#m3.3.3.6)    
-[　　　3.3.3.p3 IoTivity 빌드](#m3.3.3.p3)
+[　　　3.3.3.7 IoTivity 연결 추상계층](#m3.3.3.7)    
+[　　　3.3.3.p3 IoTivity 빌드](#m3.3.3.p3)    
 [　　　3.3.3.p5 IoTivity 심플 서버와 심플 클라이언트](#m3.3.3.p5)    
 [　　3.3.4 관련 툴 스터디](#m3.3.4)    
 [　　　3.3.4.1 SCon](#m3.3.4.1)    
@@ -233,6 +234,54 @@ RAML은 기계가 인식할 수 있는 API 설계도이며, 사람에게도 친�
 - 서비스 제공자
 - 클라이언트 컨트롤러    
 시뮬레이터는 Eclipse 플러그인 형태를 띤다. 그리고 제공하는 피쳐가 리눅스 플랫폼에서 자바 API를 통한 SDK 지원이므로, 시뮬레이터 관련 작업은 리눅스에서 진행하도록 한다. 리눅스는 Vmware에 설치된 Ubuntu 16.04를 사용한다.
+
+<a name="m3.3.3.7" />
+
+#### [07-Iotivity 연결 추상계층](https://wiki.tizen.org/images/9/9c/07-IoTivity_Connectivity_Abstraction.pdf)    
+
+IoTivity 네트워크 연결 아키텍쳐는 크게 4단계로 나뉘어진다.    
+1. 메시지 스위칭    
+게이트웨이 리소스 발견    
+라우팅 테이블 관리
+메시지 포워딩    
+2. CA 제어 컴포넌트    
+네트워크 선택과 인터페이스 제어    
+CoAP 메시지 직렬화와 파싱    
+블록단위 메시징의 흐름 제어    
+3. 전송 어댑터 컴포넌트    
+UDP, TCP, BLE, BT와 NFC를 통한 데이터 전송    
+DTLS를 사용한 안전한 데이터 교환
+4. 플랫폼 어댑터 컴포넌트    
+Ubuntu, Android, Tizen, Arduiono와 같은 플랫폼별 해당되는 Wi-Fi, BLE, 이더넷, BT    
+
+
+- Routing Through Heterogeneous Connectivity    
+
+만약 중간 게이트웨이가 다양한 네트워크 연결을 지원한다면(IP와 Bluetooth), 게이트웨이는 서로 다른 전송계층에 있는 요청과 응답을 포워드 해줘서 연결가능하게 해줄 수 있다.
+
+- Blockwise Transfer    
+
+OIC 클라이언트와 OIC 서버는 작은 블록단위의 메시지로 쪼개서 보냄으로써, 큰 크기의 메시지를 보내고 받을 수 있다.
+
+- Start from Basic API Example    
+
+클라이언트 사이드에서는 서비스나 리소스를 찾기위해 다음 API를 사용할 수 있다.    
+[OCPlatform::findResource Docs 링크](https://api-docs.iotivity.org/latest/namespace_o_c_1_1_o_c_platform.html#a96b3c0ceb833135936fa6204ea569a8a)    
+```
+OCPlatform::findResource(const std::string& host, const std::string& resourceName, OCConectivityType connectivityType, FindCallback resourceHandler);
+```
+
+이 때 모든 알려진 OIC 디바이스를 찾기 위해선 다음과 같은 코드를 사용할 수 있다.
+
+```
+requestURI << OC_RSRVD_WELL_KNOWN_URI;
+
+OCPlatform::findResource("", requetURI.str(), CT_DEFAULT, &foundResource);
+```
+
+OC_RSRVD_WELL_KNOWN_URI는 "/oic/res"를 뜻하며, 모든 discoverable한 OIC 장치를 뜻한다.    
+host 인자에 null값을 넣으면 리소스 탐색 쿼리를 멀티캐스트 하게 된다.
+
 
 <a name="m3.3.3.p3" />
 
