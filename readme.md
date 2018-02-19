@@ -494,3 +494,16 @@ IoTivity 샘플 코드에 대한 내용은 다음 링크에 담겨있다.
 1. 서버는 클라이언트 요청이 오기 전까지는 Idle한 상태로 있는다. 클라이언트 요청이 오면 그에 맞는 응답을 준다.
 2. 클라이언트는 실행되면 리소스(서버)를 찾는다. 리소스를 찾고 나서 Notify 요청을 통해서 Observer에 등록한다. 이후 주기적으로 서버로부터 상태를 응답받는다.    
 3. 이후 등록된 옵저버가 사라지면, 서버는 다시 Idle한 상태가 된다.
+
+simpleserver의 소스코드를 한번 참조해보았다. example이 있는 SConscript, 즉 /iotivity/resource/example/SConscript를 확인해보니, example_names라는 리스트의 엔트리들을 examples_env.Program이라는 명령어로 빌드를 한다. 단일 cpp 파일로 빌드된다고 볼 수 있다. 따라서 simpleserver 바이너리는 simpleserver.cpp를 단일 빌드한 결과물로 볼 수 있다.    
+시작부분의 주석을 읽어보면, 이 샘플은 리소스를 위해 인터페이스를 정의하는 방법과, 리소스를 서버에서 제공하는 방법들을 보여준다고 한다.    
+
+소스코드는 740라인이지만, main 함수는 100줄이 채 되지 않는다. 처음 수십 은, 커맨드라인 인자를 통해 변수를 설정하고, PlatformConfig 객채를 만든 뒤 적절한 값을 넣고, OCPlatform::Configure 함수를 이용해서 Configure을 한다.    
+그리고 중간에 OC_VERIFY라는 함수가 있는데 이 함수는 No Debug 환경설정이 되지 않은 경우 assert를 하고, No Debug 환경이 설정되어 있는 경우 아무런 동작도 하지 않는 코드가 된다.    
+직접 선언한 SetPlatformInfo를 통해서 스트링들로 이루어진 플랫폼 정보를 지정한 뒤, OCPlatform::registerPlatformInfo 함수를 호출해서 플랫폼 정보를 등록한다.    
+그리고 SetDeviceInfo라는 함수를 호출해서 디바이스 정보를 하나하나 등록한다. SetDeviceInfo함수는 내부적으로 OCPlatform::setPropertyValue라는 함수를 값마다 등록한다.    
+이후 LightResource 클래스를 통해서 리소스를 생성하고, 타입과 인터페이스를 설정한다. 그리고 mutex, condition_variable, unique_lock을 이용하는 코드가 있는데, 코드 내용을 찾아보고 해당 코드 바로 위에 있는 주석들을 확인해보니. while(true); 와 같은 pending 코드와 같지만, non-processor intensive version이라고 한다. 즉, CPU Computing Power를 잡아먹지 않는, 코드의 진행을 방해하는 코드이다.    
+
+메인 함수를 확인해 보았을 때, simpleserver의 핵심 코드는 LightResource 클래스와 관련이 있어 보인다.    
+LightResource 클래스에는 createResource라는 멤버함수가 있는데, 주석에 따르면 이 함수는 궂이 멤버 함수로 지정할 필요가 없고, free function(non-member function)이어도 상관없다고 한다. 그리고 내부적으로 OCPatform::registerResource 함수를 호출한다. 해당 함수를 호출하는 것이 리소스 등록의 핵심 로직으로 보인다. 여태까지 계속 확인해온 바로는 OCPlatform 네임스페이스의 함수들이 리소스, 플랫폼, 디바이스 등록의 핵심적인 역할을 한다.    
+요청이 왔을 때 처리하는 부분은 entityHandler라는 함수로 정의한다. 특정 조건에 맞는 요청일 경우 쓰레드를 하나 만들어서 그 쓰레드에서 요청을 처리하도록 프로그래밍 되어있다.
