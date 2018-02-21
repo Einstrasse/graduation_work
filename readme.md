@@ -19,6 +19,7 @@
 [　　　3.3.3.5 OCF표준과 IoTivity  개요](#m3.3.3.5)    
 [　　　3.3.3.6 OCF 시소스 타입과 IoTivity 시뮬레이터](#m3.3.3.6)    
 [　　　3.3.3.7 IoTivity 연결 추상계층](#m3.3.3.7)    
+[　　　3.3.3.8 IoTivity P2P 연결](#m3.3.3.8)    
 [　　　3.3.3.p3 IoTivity 빌드](#m3.3.3.p3)    
 [　　　3.3.3.p5 IoTivity 심플 서버와 심플 클라이언트](#m3.3.3.p5)    
 [　　3.3.4 관련 툴 스터디](#m3.3.4)    
@@ -169,7 +170,7 @@ IoTivity가 어떤 서비스를 제공해주는지 알아보기 위해 학습을
 
 IoT의 서비스 레벨 상호호환성을 지원하기 위한 OCF 표준이라는 것이 있다. IoTivity는 이 OCF 표준을 구현한 오픈소스 소프트웨어 프레임워크 중 하나이다.    
 
-** > OCF 표준 **    
+**OCF 표준**    
 OCF표준은 원격 접근이나, 리소스 타입, 보안 등의 스펙들을 정해놓았다.    
 OCF는 Open Connectivity Foundation의 약자로, 기존에 있던 OIC(Open Interconnect Consortium)에 Microsoft Qualcomm, Electrolux가 새롭게 합류하면서 확장된  IoT 표준단체이다. 운영, 특허 정책 등 모든 내용이 OIC와 동일하지만, 신규 회원사의 참여로 인해서 이름만 바뀐 형태이다.    
 
@@ -281,6 +282,76 @@ OCPlatform::findResource("", requetURI.str(), CT_DEFAULT, &foundResource);
 
 OC_RSRVD_WELL_KNOWN_URI는 "/oic/res"를 뜻하며, 모든 discoverable한 OIC 장치를 뜻한다.    
 host 인자에 null값을 넣으면 리소스 탐색 쿼리를 멀티캐스트 하게 된다.
+
+- Call Path(호출 과정)    
+
+API를 호출하면 OCPlatform -> OCPlatform_impl -> InProcClientWrapper -> OCStack -> CaAPI 순서로 호출된다.    
+다른 RESTful API의 호출 과정과 동일하다(POST, GET, PUT, OBSERVE)
+
+- 소스 코드 계층구조(Source Code Hierarchy)    
+
+`iotivity/resource/csdk/connectivity/src`에 연결 관련 소스코드가 있다.    
+라우팅 메니저 소스코드는 `/iotivity/resource/csdk/routing` 경로에 있다.
+
+- 데이터 전송 시 호출 과정(Call Path: Sending Data)    
+
+
+1. 전송 요청은 블록 단위(BWT:Block-wise tranfer)로 처리된다. 일반적으로 UDP나 블루투스를 통해 전송된다.
+
+2. BWT는 단위 데이터를 기본 크기인 1KB의 블록 데이터로 만들어서 전송 큐 쓰레드로 보낸다.
+3. 전송 큐 쓰레드는 적절한 Transport 핸들러에 데이터를 보낸다.
+4. UDP의 경우 UDP 전송 큐 스레드는 단말로 데이터를 보낸다.
+
+전송 큐는 2가지 종류가 있으며, 각각이 공통 전송 큐과 어댑터 전송 큐이다.
+
+- 데이터 수신 시 호출 과정(Call Path: Receiving Data)    
+
+
+1. UDP의 경우, UDP 수신 쓰레드는 단말로부터 데이터를 받아온다.
+2. 적절한 Transport가 UDP나 블루투스인 경우, BWT는 블록 데이터의 다음 전송 데이터 준비를 한다.
+3. 전송큐 쓰레드로 다시 보내진다.
+4. 만약 받은 데이터가 BWT의 마지막 블록 데이터인 경우, 수신 큐 쓰레드로 데이터가 전송되고, 최종적으로는 상위 레이어로 보내지게 된다.
+
+
+- CA(Connectivity Abstraction) APIs
+
+연결 추상계층의 API들은 다음과 같이 존재한다.
+```
+CAResult_t 	CAInitialize();
+void 		CATerminate();
+CAResult_t	CAStartListeningServer();
+CAResult_t	CAStopListeningServer();
+CAResult_t	CAStartDiscoveryServer();
+void		CARegisterHandler(CARequestCallback ReqHandler, CARequestCallback RespHandler, CAErrorCallback ErrorHandler);
+CAResult_t	CACreateEndpoint(CATransportFlags_t flags, CATransportAdapter_t adapter, const char *addr, uint16_t port, CAEndpoint_t **object);
+void		CADestroyEndpoint(CAEndpoint_t *object);
+CAResult_t	CAGenerateToken(CAToken_t &token, uint8_t tokenLength);
+void		CADestroyToken(CAToken_t token);
+CAResult_t	CASendRequest(const CAEndpoint_t *object, const CARequestInfo_t *requestInfo);
+CAResult_t	CASendResponse(const CAEndpoint_t *object, const CAResponseInfo_t *responseInfo);
+CAResult_t	CASelectNetwork(CATransportAdapter_t interestedNetwork);
+CAResult_t	CAUnSelectNetwork(CATransportAdapter_t nonInterestedNetwork);
+CAResult_t	CAGetNetworkInformation(CAEndpoint_t **info, uint32_t *size);
+CAResult_t	CAHandleRequestResponse()
+CAResult_t	CASetRAInfo(const CARAInfo_t *caraInfo)
+```
+
+`CAInitialize()` - 연결 추상화 모듈을 초기화한다. 어댑터와 공통 쓰레드 풀, 그외 모듈들을 초기화한다.    
+`CASelectNetwork()` - 사용할 네트워크를 고른다.    
+`CAStartDiscoveryServer()` - 멀티케스트 요청을 Listen하기 위한 서버를 실행한다. 어뎁터 설정에 따라 다른 종류의 서버가 구동된다.    
+
+`CACreateEndpoint()` - 단말을 지정한다. CADestroyEndpoint()를 이용해서 단말을 해제할 수 있다.    
+`CAGenerateToken()` - 요청과 응답을 매칭시키기 위한 토큰을 생성한다.    
+`CASendRequest()` - 리소스에 제어 요청을 보낸다.    
+`CAGetNetworkInformation()` - 네트워크 정보를 받아온다.    
+
+
+<a name="m3.3.3.8" />
+
+#### [08-Iotivity P2P 연결](https://wiki.tizen.org/images/5/50/08-IoTivity_P2P_Connection.pdf)  
+
+IoTivity는 다양한 언어들과 플랫폼을 위한 API들을 지원한다.
+
 
 
 <a name="m3.3.3.p3" />
@@ -404,7 +475,7 @@ Lite버전과 일반 버전이 있는데 일반 버전을 다운로드 하였다
 
 ### 3.4.3 IoTivity 작업
 
-** IoTivity 시뮬레이터 구동 환경 구축 **    
+**IoTivity 시뮬레이터 구동 환경 구축**    
 
 IoTivity 시뮬레이터는 리눅스에서만 지원이 된다. 현재 작업용 PC의 OS는 Windows 10이므로, 리눅스 작업은 가상머신에서 실시하도록 한다. 가상머신의 Guest OS는 Ubuntu 16.04 LTS 배포판을 이용하기로 한다.    
 
