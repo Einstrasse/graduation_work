@@ -402,6 +402,26 @@ Host gerrit.iotivity.org
 
 scons를 이용해서 빌드할 수 있다.
 
+안드로이드나 라즈베리파이용 빌드를 할 수 있는데, 라즈베리파이용을 위한 빌드를 하는 도중 다음과 같은 에러 메시지를 확인했다.
+
+```
+\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\* Warning \*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*
+\* You are trying cross build, please make sure cross (arm) libraries are
+\* installed!
+\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*
+
+Checking for C++ library boost_thread... no
+Did not find boost_thread, exiting!
+
+```
+`iotivity/extlibs/boost`에 boost arm 라이브러리가 설치되지 않은 것으로 보인다. SConscript를 보니, sourceforce에서 라이브러리를 받아오는 것으로 보인다.
+
+Android 플랫폼으로 빌드를 하니 해당 경로에 알아서 라이브러리를 가져와서 빌드하는 반면, arm Linux 플랫폼으로 빌드를 하니 위 메시지와 함께 실패한다.
+
+https://wiki.iotivity.org/iotivity_porting_to_arm_based_platforms    
+https://lists.iotivity.org/pipermail/iotivity-dev/2016-September/005531.html    
+위 문서들을 참조해서 IoTivity arm 크로스 컴파일에 대해서 좀 알아보고, 최후의 방법으로는 라즈베리 파이에서 빌드를 하는 방법도 있을 것이다.
+
 
 <a name="m3.3.3.p5" />
 
