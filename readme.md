@@ -421,7 +421,64 @@ Android 플랫폼으로 빌드를 하니 해당 경로에 알아서 라이브러
 https://wiki.iotivity.org/iotivity_porting_to_arm_based_platforms    
 https://lists.iotivity.org/pipermail/iotivity-dev/2016-September/005531.html    
 위 문서들을 참조해서 IoTivity arm 크로스 컴파일에 대해서 좀 알아보고, 최후의 방법으로는 라즈베리 파이에서 빌드를 하는 방법도 있을 것이다.
+학습자료에 따르면 라즈베리파이에서 빌드를 하는 식으로 해결한 것으로 보인다. 일단 해당 방법을 적용해보도록 하자.
 
+라즈베리파이에서 빌드를 시도하다보면 extlib에 몇개의 레포지토리를 clone 하라는 내용이 뜬다. uuid package를 못찾는 다는 내용은 다음 명령어로 해결이 가능하다.
+
+```
+apt install -y uuid-dev
+```
+이후 `No package 'gio-unix-2.0' found`라는 에러 메시지가 나타난다.
+다음 명령어로 해결해보자
+```
+sudo apt-get install libglib2.0-dev
+```
+https://askubuntu.com/questions/281984/how-install-gio-unix-2-28-0
+
+이제는 `No package' sqlite3' found`가 뜬다
+```
+apt install -y sqlite3
+apt install -y libsqlite3-dev
+```
+
+이번에는 `/bin/sh: 1: autoreconf: not found`가 뜬다.
+autoconf를 깔면 autoreconf도 같이 깔리는 듯 하다.
+```
+apt install -y autoconf
+```
+
+뭐지.. autoconf에러가 나버렸다.
+`autoreconf: /usr/bin/autoconf failed with exit status: 1`
+그래서 libtool이란걸 설치해봤다.
+```
+apt install -y libtool
+```
+http://sojro.tistory.com/entry/autoreconf-%EC%84%A4%EC%B9%98-%EB%B0%8F-%EC%97%90%EB%9F%AC-%ED%99%98%EA%B2%BD-%EC%88%98%EC%A0%95
+요런것들 해결이 되는듯..
+
+이제는또 다른 에러가 나타났다.
+`fatal error: curl/curl.h: No such file or directory`
+이것도 설치..
+```
+sudo apt-get install libcurl-dev
+```
+이게 안되면
+```
+sudo apt-get install libcurl4-openssl-dev
+```
+
+https://stackoverflow.com/questions/11471690/curl-h-no-such-file-or-directory
+
+이번에는 빌드시 시스템이 뻗어버린다. 아마 메모리가 터져서 그럴 것으로 생각되므로 Swap을 붙여서 빌드해봐야 할 것 같다.
+
+http://www.spacek.xyz/mle/?p=375
+위 글을 참조해서 2GB 스왑을 붙여보았다.
+
+그리고 멀티 쓰레드로 실행하니 자꾸 에러가 나서, 싱글 쓰레드로 빌드를 해 보았다.
+
+시간이 오래걸리긴 했지만, 정상적으로 완료가 되었다.
+
+이제 각각에 필요한 플랫폼에서 빌드가 되었으므로, 추후 실행을 해 보고 소스코드를 작성하도록 하자.
 
 <a name="m3.3.3.p5" />
 
