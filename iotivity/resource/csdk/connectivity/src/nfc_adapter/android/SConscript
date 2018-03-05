@@ -1,0 +1,8 @@
+#######################################################
+#       Build NFC Client and Server for Android
+#######################################################
+import os
+
+Import('connectivity_env')
+
+connectivity_env.AppendUnique(CA_SRC=[File('canfcserver.c')])
