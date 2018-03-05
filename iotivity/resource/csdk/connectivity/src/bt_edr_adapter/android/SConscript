@@ -1,0 +1,17 @@
+#######################################################
+#       Build BT EDR adapter for Android
+#######################################################
+import os
+
+Import('connectivity_env')
+
+connectivity_env.PrependUnique(CPPPATH=Dir('.'))
+
+src_files = [
+    File('caedrclient.c'),
+    File('caedrutils.c'),
+    File('caedrnwmonitor.c'),
+    File('caedrserver.c'),
+]
+
+connectivity_env.AppendUnique(CA_SRC=src_files)

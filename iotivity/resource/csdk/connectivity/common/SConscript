@@ -1,0 +1,30 @@
+##
+# CA build script
+##
+import os
+
+Import('connectivity_env')
+
+target_os = connectivity_env.get('TARGET_OS')
+
+connectivity_env.AppendUnique(CPPPATH=[
+    '#/resource/c_common/octhread/include/',
+    '#/resource/csdk/connectivity/common/inc/',
+    '#/resource/csdk/logger/include/',
+])
+
+######################################################################
+# Source files
+# Use File objects so scons can track location
+######################################################################
+ca_common_src = [File(src) for src in (
+    'src/uarraylist.c',
+    'src/ulinklist.c',
+    'src/uqueue.c',
+    'src/caremotehandler.c',
+)]
+
+if connectivity_env['POSIX_SUPPORTED'] or target_os in ('windows'):
+    ca_common_src.append(File('src/cathreadpool_pthreads.c'))
+
+connectivity_env.AppendUnique(CA_SRC=ca_common_src)

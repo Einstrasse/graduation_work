@@ -1,0 +1,21 @@
+#######################################################
+#       Build BT EDR adapter for Tizen
+#######################################################
+import os
+
+Import('connectivity_env')
+
+connectivity_env.PrependUnique(CPPPATH=Dir('.'))
+
+connectivity_env.ParseConfig("pkg-config --cflags --libs capi-network-bluetooth")
+
+src_files = [
+    File('caedrclient.c'),
+    File('caedrdevicelist.c'),
+    File('caedrendpoint.c'),
+    File('caedrnwmonitor.c'),
+    File('caedrserver.c'),
+    File('caedrutils.c')
+]
+
+connectivity_env.AppendUnique(CA_SRC=src_files)
