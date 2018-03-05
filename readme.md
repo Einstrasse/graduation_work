@@ -400,9 +400,44 @@ Host gerrit.iotivity.org
 	$ git clone https://github.com/01org/tinycbor.git extlibs/tinycbor/tinycbor
 	$ git clone https://github.com/ARMmbed/mbedtls.git extlibs/mbedtls/mbedtls -b mbedtls-2.4.2
 
-scons를 이용해서 빌드할 수 있다.
+scons를 이용해서 빌드할 수 있다. 다양한 플랫폼에 대해 빌드를 실시할 수 있다.
 
-안드로이드나 라즈베리파이용 빌드를 할 수 있는데, 라즈베리파이용을 위한 빌드를 하는 도중 다음과 같은 에러 메시지를 확인했다.
+*안드로이드 빌드*    
+
+안드로이드는 OIC 클라이언트 예제 코드만 보여지고 있다.
+안드로이드 빌드 시 다음 경로에서 서버 리소스의 IP주소를 설정해 주어야 한다.
+```
+iotivity/java/examples-android/simpleclient/src/main/java/org/iotivity/base/examples/SimpleClient.java
+```
+
+`OcPlatform.findResource("196.168.0.1", ...` 와 같은 형식으로 String으로 입력한다.
+
+안드로이드를 타겟으로 하여 빌드할때는 다음과 같은 명령어를 사용한다.
+
+```
+$ scons TARGET_OS=android TARGET_ARCH=armeabi-v7a -j8
+```
+
+빌드가 다 된 이후에는 다음 경로에 apk파일들이 생성된다.
+```
+iotivity/java/examples-android/simpleclient/build/outputs/apk
+```
+
+adb를 이용해서 안드로이드 폰에 설치할 수 있다.
+
+```
+$ adb install simpleclient-armeabi-v7a-debug.apk
+```
+
+만약 [INSTALLED_FAILED_ALREADY_EXISTS]에러가 나타난다면 `-r` 옵션을 주어서 재설치 하면 된다.
+
+```
+$ adb install -r simpleclient-armeabi-v7a-debug.apk
+```
+
+*라즈베리파이 빌드*    
+
+라즈베리파이용을 위한 빌드를 하는 도중 다음과 같은 에러 메시지를 확인했다.
 
 ```
 \*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\* Warning \*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*
@@ -543,6 +578,30 @@ Lite버전과 일반 버전이 있는데 일반 버전을 다운로드 하였다
 위 절차를 통해서 라즈베리파이의 SD카드에 라즈비안 OS 이미징 작업을 완료하였다. 입력장치로 LED가 포함된 기계식 키보드를 사용할 시, 부족한 전원량으로 인하여 가끔씩 라즈베리파이가 꺼지는 현상이 있었다. 이러한 현상을 방지하기 위해서 LED가 없는 키보드를 사용하거나, Telnet이나 SSH와 같은 원격 쉘을 이용한 작업을 할 것이 권장된다.    
 
 라즈베리파이의 기본 유저 이름은 "pi"이고 초기에는 아무런 인증 없이 사용자 로그인이 되었다. 그리고 sudo su 명령어를 통해서 인증 없이 루트 권한을 취득할 수 있다. 이 상태에서 초기 패스워드를 지정해 주었다.
+
+라즈베리파이에 고정 IP를 할당해주기 위해 네트워크 설정파일에 다음과 같이 기입한다.
+네트워크 설정 파일의 경로는 다음과 같다.
+경로 `/etc/network/interfaces`    
+
+```
+source-directory /etc/network/interfaces.d
+
+auto lo
+iface lo inet loopback
+
+iface eth0 inet manual
+
+allow-hotplug wlan0
+iface wlan0 inet static
+	wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+address 192.168.35.135
+netmask 255.255.255.0
+gateway 192.168.35.1
+```
+홈 네트워크의 네트워크 IP 대역은 192.168.35.* 대역이며, 라즈베리 파이에 할당한 아이피 주소는 192.168.35.135이다. wpa-conf에 지정한 파일에는 자동으로 연결하는 무선 네트워크의 ssid와 패스워드, 그리고 암호화 방식이 지정되어 있다.
+
+네트워크를 새로 설정해준 이후 재부팅하여 설정이 제대로 되었는지 확인해보았다.
+원하는대로 IP주소가 설정된 것을 확인할 수 있었다.
 
 <a name="m3.4.2" />    
 
