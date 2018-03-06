@@ -763,3 +763,12 @@ simpleserver의 소스코드를 한번 참조해보았다. example이 있는 SCo
 메인 함수를 확인해 보았을 때, simpleserver의 핵심 코드는 LightResource 클래스와 관련이 있어 보인다.    
 LightResource 클래스에는 createResource라는 멤버함수가 있는데, 주석에 따르면 이 함수는 궂이 멤버 함수로 지정할 필요가 없고, free function(non-member function)이어도 상관없다고 한다. 그리고 내부적으로 OCPatform::registerResource 함수를 호출한다. 해당 함수를 호출하는 것이 리소스 등록의 핵심 로직으로 보인다. 여태까지 계속 확인해온 바로는 OCPlatform 네임스페이스의 함수들이 리소스, 플랫폼, 디바이스 등록의 핵심적인 역할을 한다.    
 요청이 왔을 때 처리하는 부분은 entityHandler라는 함수로 정의한다. 특정 조건에 맞는 요청일 경우 쓰레드를 하나 만들어서 그 쓰레드에서 요청을 처리하도록 프로그래밍 되어있다.
+
+
+*IoTivity 안드로이드 어플리케이션 제작*     
+이제 IoTivity의 대략적인 부분은 파악했으니, 일단 안드로이드 클라이언트부터 작성해보자. 안드로이드의 경우 일반적인 텍스트 에디터로 작업을 하면 개발이 어려운 부분이 있으므로 안드로이드 스튜디오로 작업하는 방법에 대해 알아보자. 다음 링크의 아랫 부분에 있는 `Using IoTivity Base Android API in an Android Studio Project` 부분을 참고하여 Windows 계열 플랫폼에서 안드로이드 스튜디오를 이용하여 IoTivity 안드로이드 앱을 제작할 수 있다. jar파일과 aar파일을 import하는 방식으로 간단하게 개발할 수 있다. jar파일은 자바 아카이브 파일이고, aar파일은 안드로이드 아카이브 파일이다. 안드로이드 라이브러리 파일은 AAR 파일로 컴파일된다. JAR파일과의 차이점으로는 안드로이드 리소스와 매니페스트 파일이 포함될 수 있다는 점이다.
+
+[안드로이드 라이브러리 관련 문서](https://developer.android.com/studio/projects/android-library.html?hl=ko)    
+[IoTivity 안드로이드 앱 개발 관련 문서](https://wiki.iotivity.org/android_build_instructions)    
+
+일단 첫번째로 안드로이드 스튜디오를 설치한다. Windows 10에서 진행하였다.
