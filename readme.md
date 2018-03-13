@@ -607,6 +607,8 @@ gateway 192.168.35.1
 
 ### 3.4.2 아두이노 작업
 
+IoTivity wiki에서 아두이노 지원과 관련된 [문서](https://wiki.iotivity.org/build_iotivity_project_for_arduino)에 따르면 지원하는 아두이노 버전과 설정은 Arduino ATMega 2560와 Arduino Due라고 나와있다. 여기서는 Arduino Due를 이용해서 진행하기 위해, 해당 보드를 구매하려고 한다.
+
 <a name="m3.4.3" />    
 
 ### 3.4.3 IoTivity 작업
