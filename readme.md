@@ -603,11 +603,97 @@ gateway 192.168.35.1
 네트워크를 새로 설정해준 이후 재부팅하여 설정이 제대로 되었는지 확인해보았다.
 원하는대로 IP주소가 설정된 것을 확인할 수 있었다.
 
+이제 라즈베리파이에 카메라 모듈을 연결하여 동영상과 사진 촬영이 가능한지 확인해보도록 하겠다.
+라즈베리파이에서 카메라 사용하는 설정과 관련된 블로그 링크는 다음과 같다.
+[라즈베리파이 카메라 설정 블로그](https://kocoafab.cc/tutorial/view/334)  
+
+일단 카메라 사용을 enable해주어야 한다.
+```
+sudo raspi-config
+```
+TUI환경에서 5 Interfacing Options를 선택한다. 이후 1 Camera를 눌러서 enable해준다.    
+설정 이후 재부팅을 해주어야 한다.
+
+다음 명령어로 사진을 찍어볼 수 있다.
+```
+raspistill -o [filename.jpg]
+```
+5초뒤에 촬영이 되며, 촬영을 해 본 결과 성공적으로 사진이 촬영되지만, 초점이 맞지 않고 파일의 용량이 지나치게 크다.
+
+동영상 촬영 테스트는 다음 명령어로 테스트가 가능하다.
+```
+raspivid -o [filename.h264]
+```
+5초간 촬영이 되며, 지정한 파일이름으로 저장이 된다.
+
+
+카메라가 제대로 설정된다면 ffmpeg을 이용해서 비디오 스트리밍이 가능하다. 라즈베리파이용 ffmpeg이 따로 없으므로 별도로 빌드를 해야 한다. 관련 블로그 링크는 다음과 같다.    
+[라즈베리파이 ffmpeg 설치](https://m.blog.naver.com/PostView.nhn?blogId=chandong83&logNo=220851288433&proxyReferer=https%3A%2F%2Fwww.google.co.kr%2F)    
+
+ffmpeg의 빌드 파일중에서 ARM 아키텍처를 위한 prebuilt 파일은 없기 때문에 직접 소스코드를 통해 빌드를 해야 한다.
+
+일단 의존성이 있는 H264 라이브러리를 설치한다.
+
+```
+git clone git://git.videolan.org/x264
+cd x264
+./configure --host=arm-unknown-linux-gnueabi --enable-static --disable-opencl
+make -j2 # 코어 수에 따라 파라메터가 다르다
+sudo make install
+```
+
+ffmpeg를 받아서 빌드한다.
+```
+git clone https://github.com/FFmpeg/FFmpeg.git --depth 1 # delta 정보를 빼고 불러온다. 
+cd FFmpeg
+sudo ./configure --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree
+make -j2
+sudo make install
+```
+
+카메라 장비를 /dev 디렉토리에서 확인을 할 수 있어야 한다. /dev/video0 에 파이 카메라가 인식이 되어야 하는데, 만약 나타나지 않는다면 다음의 조치를 통해 해결할 수 있다.
+
+```
+rpi-update # v4l2 드라이버가 사용가능한 버전으로 업데이트한다
+modrpobe bcm2835-v4l2 # /dev/video0를 로드하고 생성하기 위한 명령어
+```
+
+[ffmpeg으로 picamera 사용하기](https://gist.github.com/moritzmhmk/48e5ed9c4baa5557422f16983900ca95)    
+
+`/dev/video0`가 제대로 동작하는지 확인하기 위해 다음 명령어로 사진을 찍어서 파일로 저장해볼 수 있다.
+
+
+```
+ffmpeg -f video4linux2 -s 640x480 -r 1 -i /dev/video0 -vframes 1 -f image2 image.jpg
+```
+사진이 정상적으로 촬영된 것으로 보아, /dev/video0에 파이카메라가 정상적으로 바인딩되었다는 것을 확인할 수 있다.
+
+다음 명령어로 h264 비디오를 촬영할 수 있다.
+```
+ffmpeg -f video4linux2 -input_format h264 -video_size 1280x720 -framerate 30 -i /dev/video0 -vcodec copy -an test.h264
+```
+촬영 도중 q를 누르면 촬영을 종료한다.
+
+출력 파일을 윈도우 시스템으로 옮긴 뒤, H264 확장자 파일을 재생할 수 있는 VLC 플레이어를 설치해서 재생해보도록 하겠다.
+[VLC플레이어 다운로드 링크](http://www.videolan.org/)    
+해당 플레이어로 재생을 하니 H264 확장자 파일을 잘 재생한다. 다만 사진과 비슷하게 파일에 초점이 잘 맞추어져 있지 않다.
+
+
+영상 스트리밍 방식으로는 GStreamer, MJPEG 스트리밍등의 방법이 있다.    
+[파이카메라 GStreamer](http://programmerchoo.tistory.com/87)    
+[파이카메라 MJPEG 스트리밍](http://www.hardcopyworld.com/gnuboard5/bbs/board.php?bo_table=lecture_rpi&wr_id=10)    
+
+다양한 방법 중에서 적절한 방법을 골라서 CCTV 기능을 추가해보도록 하겠다.
+
+
+
 <a name="m3.4.2" />    
 
 ### 3.4.2 아두이노 작업
 
-IoTivity wiki에서 아두이노 지원과 관련된 [문서](https://wiki.iotivity.org/build_iotivity_project_for_arduino)에 따르면 지원하는 아두이노 버전과 설정은 Arduino ATMega 2560와 Arduino Due라고 나와있다. 여기서는 Arduino Due를 이용해서 진행하기 위해, 해당 보드를 구매하려고 한다.
+IoTivity wiki에서 아두이노 지원과 관련된 [문서](https://wiki.iotivity.org/build_iotivity_project_for_arduino)에 따르면 지원하는 아두이노 버전과 설정은 Arduino ATMega 2560와 Arduino Due라고 나와있다. 여기서는 Arduino Due를 이용해서 진행하기 위해, 해당 보드를 구매하려고 한다.    
+
+해당 보드의 가격이 비싸고 구매 대행을 해야 할 것 같아서, 기존에 가지고 있는 Arduino Uno를 Raspberry pi와 GPIO로 Serial 통신을 통해 제어를 하고, 아두이노에는 IoTivity 어플리케이션을 올리지 않도록 하고 진행하기로 하였다.
 
 <a name="m3.4.3" />    
 
