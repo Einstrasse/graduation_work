@@ -884,3 +884,14 @@ LightResource 클래스에는 createResource라는 멤버함수가 있는데, �
 9. 나타나는 항목 중 :iotivity-base-release를 선택한다.    
 임포트한 내용들이 제대로 잘 동작하는지 확인하기 위해서 안드로이드 예제 코드 중, simple client를 구현해본 뒤 디바이스에 설치해서 결과를 확인해본다.    
 위 과정들을 진행해보니, scons로 빌드한 apk파일과 안드로이드 스튜디오로 만든 앱은 동일한 동작을 한다. 
+
+*IoTivity 기능들*    
+IoTivity는 다양한 Feature를 가지고 있다.
+
+1. Connection Abstraction : Gateway가 Bluetooth나 IP와 같은 다양한 network transport를 갖고 통신을 할 때 크게 상관하지 않고 쉽게 프로그래밍해서 통신하도록 해주는 feature이다.
+2. P2P Connection : RESTful API를 통해서 client와 server가 적절히 peer-to-peer 통신하는 기능이다.
+3. Scene Manager : 여러개의 Node에 대하여 필요한 설정(Scene)을 사전에 정의해서 한번의 동작으로 Multiple node가 약속된 동작을 하도록 설정할 수 있다.
+4. Resource Encapsulation : RESTful API를 이용해서 Remote Node를 제어하는것이 복잡하므로, 추상화된 계층을 하나 추가해서 쉽게 원격 노드를 제어할 수 있는 인터페이스를 제공한다.
+5. Resource Hosting : 리소스 호스팅은 Rich device가 Light Device에 대하여 subscribe를 해서 상태가 변할 때 알림을 받고, 그 리소스에 대한 정보를 자신이 캐싱하고 있는 것이다(Mirror Server). Consumer, Resource Hosting, Provider의 3개의 컴포넌트로 이루어진 아키텍쳐로 이해하면 된다. Resource Hosting이 Provider의 정보를 가지고 있다가(Caching) Consumer가 필요로 할 때 Hosting이 알려준다. 실제 리소스와 같은 정보를 같이 가지고 있는다. request에 대한 업무를 분담해준다.
+6. Resource Directory : Resource Hosting과 유사하지만 thin 장비를 위해 요청을 처리한다. Resource Directory가 Thin Device에게 오는 request를 대신 response한다. 대신해서 일을 처리한다.(Cached Server)
+7. Resource Container : OIC를 따르는 Node와 OIC를 따르지 않는 녀석간의 호환을 가능하게 해준다.
