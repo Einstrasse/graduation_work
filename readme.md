@@ -894,4 +894,6 @@ IoTivity는 다양한 Feature를 가지고 있다.
 4. Resource Encapsulation : RESTful API를 이용해서 Remote Node를 제어하는것이 복잡하므로, 추상화된 계층을 하나 추가해서 쉽게 원격 노드를 제어할 수 있는 인터페이스를 제공한다.
 5. Resource Hosting : 리소스 호스팅은 Rich device가 Light Device에 대하여 subscribe를 해서 상태가 변할 때 알림을 받고, 그 리소스에 대한 정보를 자신이 캐싱하고 있는 것이다(Mirror Server). Consumer, Resource Hosting, Provider의 3개의 컴포넌트로 이루어진 아키텍쳐로 이해하면 된다. Resource Hosting이 Provider의 정보를 가지고 있다가(Caching) Consumer가 필요로 할 때 Hosting이 알려준다. 실제 리소스와 같은 정보를 같이 가지고 있는다. request에 대한 업무를 분담해준다.
 6. Resource Directory : Resource Hosting과 유사하지만 thin 장비를 위해 요청을 처리한다. Resource Directory가 Thin Device에게 오는 request를 대신 response한다. 대신해서 일을 처리한다.(Cached Server)
-7. Resource Container : OIC를 따르는 Node와 OIC를 따르지 않는 녀석간의 호환을 가능하게 해준다.
+7. Resource Container : 리소스 컨테이너는 OIC 리소스와 Non-OIC 리소스간의 호환성을 유지하도록 브릿지 역할을 한다. OIC 클라이언트는, OIC 서버 역할을 하는 리소스 컨테이너를 통해서 Non-OIC 리소스를 접근할 수 있다. 리소스 컨테이너는 네이티브 번들(라이브러리) 파일을 컨테이너 내부의 필요한 함수들로 mapping 시키는 방식으로 동작한다.
+8. IoTivity Cloud : 접근성을 로컬 네트워크에서 확장시키는 것이다. Easy-Setup으로 입력장치 없이 포장을 뜯지 않은 장비의 네트워크 설정을 쉽게 한다. Remote-Control으로 다른 네트워크 지역 간 리소스 서버와 클라이언트 통신이 가능하도로 한다. 두개의 통신은 클라우드가 매게한다. Service-Integration은 제3의 서비스 제공자가 리소스 서버를 보고 제어할 수 있도로 한다.
+9. Easy Setup Manager : UI가 없는 장비를 손쉽게 IoTivity 네트워크에 연결시키기 위한 기능이다. Easy Setup을 통해서 핵심 정보들을 장비에 전송할 수 있다. AP 정보, 장비 설정, 클라우드 접근 정보 등을 전송할 수 있다.
