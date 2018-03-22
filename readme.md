@@ -897,3 +897,5 @@ IoTivity는 다양한 Feature를 가지고 있다.
 7. Resource Container : 리소스 컨테이너는 OIC 리소스와 Non-OIC 리소스간의 호환성을 유지하도록 브릿지 역할을 한다. OIC 클라이언트는, OIC 서버 역할을 하는 리소스 컨테이너를 통해서 Non-OIC 리소스를 접근할 수 있다. 리소스 컨테이너는 네이티브 번들(라이브러리) 파일을 컨테이너 내부의 필요한 함수들로 mapping 시키는 방식으로 동작한다.
 8. IoTivity Cloud : 접근성을 로컬 네트워크에서 확장시키는 것이다. Easy-Setup으로 입력장치 없이 포장을 뜯지 않은 장비의 네트워크 설정을 쉽게 한다. Remote-Control으로 다른 네트워크 지역 간 리소스 서버와 클라이언트 통신이 가능하도로 한다. 두개의 통신은 클라우드가 매게한다. Service-Integration은 제3의 서비스 제공자가 리소스 서버를 보고 제어할 수 있도로 한다.
 9. Easy Setup Manager : UI가 없는 장비를 손쉽게 IoTivity 네트워크에 연결시키기 위한 기능이다. Easy Setup을 통해서 핵심 정보들을 장비에 전송할 수 있다. AP 정보, 장비 설정, 클라우드 접근 정보 등을 전송할 수 있다.
+10. Notification Service : Noti 서비스를 시작/정지하고 Noti 서비스를 찾고 구독한다. Notify 메시지를 보내고 Noti 메시지와 동기화한다. IoTivity 기본 API만 가지고도 Noti를 구현할 수 있으나 여러 문제가 있다. 이러한 점을 해결해줄 만한 feature를 많이 제공하는 것이 Notification service이다.
+11. Provisioning Manager : IP 서브넷에 있는 장비들의 보안 매니저역할을 한다. 소유권을 가지고 와서 ACL을 기반으로 접근통제를 한다. 크게 소유권 전환과 소유하는 장비에 대한 보안관리(비밀번호, ACL 관리)를 한다.
