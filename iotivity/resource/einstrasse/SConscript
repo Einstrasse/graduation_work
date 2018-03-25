@@ -1,0 +1,150 @@
+#******************************************************************
+#
+# Copyright 2014 Intel Mobile Communications GmbH All Rights Reserved.
+#
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# Author : Einstrasse
+# Create Date : 2018-3-24
+# Comment : SConscript file for Einstrasse' graduation_work written in IoTivity API
+
+Import('env')
+
+##
+# Einstrass's project build script
+##
+lib_env = env.Clone()
+SConscript('#build_common/thread.scons', exports={'thread_env': lib_env})
+
+# Add third party libraries
+SConscript('#resource/third_party_libs.scons', 'lib_env')
+einstrasse_env = lib_env.Clone()
+target_os = einstrasse_env.get('TARGET_OS')
+
+######################################################################
+# Build flags
+######################################################################
+einstrasse_env.AppendUnique(CPPPATH=[
+    '#/resource/csdk/security/include',
+    '#/resource/include/',
+    '#/resource/csdk/include',
+    '#/resource/csdk/stack/include',
+    '#/resource/c_common/ocrandom/include',
+    '#/resource/csdk/logger/include',
+    '#/resource/oc_logger/include'
+])
+
+einstrasse_env.PrependUnique(LIBS=['coap'])
+
+if target_os not in ['msys_nt', 'windows']:
+    einstrasse_env.AppendUnique(LIBS=['connectivity_abstraction'])
+
+einstrasse_env.AppendUnique(LIBS=['octbstack'])
+einstrasse_env.AppendUnique(LIBS=['oc'])
+
+compiler = einstrasse_env.get('CXX')
+if 'g++' in compiler:
+    einstrasse_env.AppendUnique(CXXFLAGS=['-std=c++0x', '-Wall'])
+
+if target_os in ['msys_nt', 'windows']:
+    einstrasse_env.PrependUnique(LIBS=[
+        'mswsock',
+        'ws2_32',
+        'iphlpapi',
+        'ole32'
+    ])
+else:
+    einstrasse_env.PrependUnique(LIBS=['oc_logger'])
+
+if einstrasse_env.get('SECURED') == '1':
+    einstrasse_env.AppendUnique(LIBS=[
+        'mbedtls',
+        'mbedx509',
+        'mbedcrypto'
+    ])
+    if target_os in ['msys_nt', 'windows']:
+        einstrasse_env.AppendUnique(LIBS=['advapi32'])
+
+if target_os == 'android':
+    einstrasse_env.AppendUnique(CXXFLAGS=['-frtti', '-fexceptions'])
+    einstrasse_env.AppendUnique(LIBS=['gnustl_shared'])
+
+    if not einstrasse_env.get('RELEASE'):
+        einstrasse_env.AppendUnique(LIBS=['log'])
+
+if target_os in ['msys_nt', 'windows']:
+    einstrasse_env.AppendUnique(LIBS=[
+        'Comctl32',
+        'Gdi32',
+        'User32'
+    ])
+
+
+def make_single_file_cpp_program(program_name):
+    return einstrasse_env.Program(program_name, program_name + ".cpp")
+
+
+######################################################################
+# Source files and Targets
+######################################################################
+example_names = [
+    'lightserver'
+]
+
+# if target_os not in ['windows', 'msys_nt']:
+#     example_names += [
+#         'fridgeserver',
+#         'fridgeclient',
+#         'presenceserver',
+#         'presenceclient',
+#         'roomserver',
+#         'roomclient',
+#         'garageserver',
+#         'garageclient',
+#         'groupserver',
+#         'groupclient',
+#         'lightserver',
+#         'threadingsample',
+#     ]
+#     if 'CLIENT' in einstrasse_env.get('RD_MODE'):
+#         einstrasse_env.AppendUnique(
+#             CPPPATH=['../csdk/resource-directory/include'])
+#         einstrasse_env.AppendUnique(LIBS=['resource_directory'])
+#         example_names += ['rdclient']
+
+einstrasse = list(map(make_single_file_cpp_program, example_names))
+
+######################################################################
+# Other einstrasse
+######################################################################
+cbor = einstrasse_env.ScanJSON()
+einstrasse_env.Alias("install", cbor)
+einstrasse += cbor
+einstrasse_env.UserInstallTargetExtra(einstrasse)
+
+# if target_os in ['msys_nt', 'windows']:
+    # winUIClient = einstrasse_env.Program(
+    #     'winUIClient', ['winuiclientgui.cpp', 'winuiclient.cpp'])
+    # einstrasse += [winUIClient]
+    # mediaserver uses GetVersionEx which is a windows native/desktop only API.
+    # Only build for Native/Win32
+    # if env.get('MSVC_UWP_APP') != '1':
+    #     mediaserver = einstrasse_env.Program('mediaserver', 'mediaserver.cpp')
+    #     einstrasse += [mediaserver]
+
+einstrasse_env.Alias("einstrasse", einstrasse)
+einstrasse_env.AppendTarget('einstrasse')
+einstrasse_env.Alias("install", einstrasse)
