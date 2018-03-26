@@ -605,6 +605,11 @@ gateway 192.168.35.1
 
 라즈베리파이 3모델에는 위와 같이 `192.168.35.135` IP주소를 할당하였고, 라즈베리파이 2모델에는 `192.168.35.136` IP주소를 할당하였다.
 
+또한 부팅 시 라즈베리파이에서 ssh 서버 서비스가 자동으로 구동되도록 하기 위해서 다음과 같은 명령어를 입력한다.
+```
+sudo systemctl enable ssh
+```
+
 이제 라즈베리파이에 카메라 모듈을 연결하여 동영상과 사진 촬영이 가능한지 확인해보도록 하겠다.
 라즈베리파이에서 카메라 사용하는 설정과 관련된 블로그 링크는 다음과 같다.
 [라즈베리파이 카메라 설정 블로그](https://kocoafab.cc/tutorial/view/334)  
@@ -899,3 +904,30 @@ IoTivity는 다양한 Feature를 가지고 있다.
 9. Easy Setup Manager : UI가 없는 장비를 손쉽게 IoTivity 네트워크에 연결시키기 위한 기능이다. Easy Setup을 통해서 핵심 정보들을 장비에 전송할 수 있다. AP 정보, 장비 설정, 클라우드 접근 정보 등을 전송할 수 있다.
 10. Notification Service : Noti 서비스를 시작/정지하고 Noti 서비스를 찾고 구독한다. Notify 메시지를 보내고 Noti 메시지와 동기화한다. IoTivity 기본 API만 가지고도 Noti를 구현할 수 있으나 여러 문제가 있다. 이러한 점을 해결해줄 만한 feature를 많이 제공하는 것이 Notification service이다.
 11. Provisioning Manager : IP 서브넷에 있는 장비들의 보안 매니저역할을 한다. 소유권을 가지고 와서 ACL을 기반으로 접근통제를 한다. 크게 소유권 전환과 소유하는 장비에 대한 보안관리(비밀번호, ACL 관리)를 한다.
+
+위와 같은 IoTivity Feature 중에서 사용할 것과 안할 것을 추려보자.
+1. Connection Abstraction : 별도로 여러개의 게이트웨이를 갖는 복잡한 네트워크 구성이 필요하지 않으므로 사용하지 않을 예정이다.(X)
+2. p2p Connection : 기본적으로는 사용할 예정이다.(O)
+3. Scene Manager : 사용해서 상황(Scene)에 따른 Multi Node의 동시적인 Configuration을 사용해볼 예정이다.(O)
+4. Resource Encapsulation : 사용할 수도 있으나, 일단은 사용하지 않을 계획이다.(X)
+5. Resource Hosting & Resource Directory : Resource Directory만 사용할 예정이다.(O)
+6. Resource Container : Non-OIC 장비를 사용하지 않을 것이므로, 사용하지 않을 예정이다.(O)
+7. IoTivity Cloud : 원격에서 제어가 가능하도록 사용할 예정이다.(O)
+8. Easy Setup Manager : 다른 AP에 설치가 가능하도록 사용할 예정이다.(O)
+9. Notification Service : 사용하면 좋으나, IoTivity Cloud에 대한 적용에 있어서 선택적으로 사용할 수도 있다.(X)
+10. Provisioning Manager : 보안성 향상을 위해서 사용하는것이 좋으나, 선택적으로 사용해볼 예정이다.(X)
+
+[코딩 작업]
+첫번째로 simpleserver.cpp를 기반으로 간단한 요청에 대해 응답하는 서버를 만들어 보기로 하였다. 필요없는 기능을 제거하고 필요한 기능을 추가하는 방식으로 진행하기 위해 einstrasse라는 별도의 디렉토리를 만들어서 테스트 해 보았다. 클라이언트 기능은 IoTivity Simulator를 이용하면 클라이언트를 직접 구현하지 않고도 간단하게 테스트 해 볼 수 있는장점이 있다.
+
+Einstrasse라는 디렉토리를 만들어서 SConscript를 적절히 커스터마이징 하여 사용할려고 했는데, 원인을 알 수 없이 제대로 동작하지 않았다. SConscript가 적절하게 설정되지 않았기 때문으로 생각되어 example 디렉토리에 같이 lightserver.cpp를 만들어서 작업하기로 하였다.
+
+Simulator에서 보낸 요청이 lightserver 어플리케이션의 entityHandler에 도달하지 조차 못하여서 몇일을 끙끙 싸매면서 원인을 파악하려고 노력해보았다. 확인해본 결과 Security Configuration관련된 문제로 알려졌다.
+
+[IoTivity Wiki 초기 설정](https://wiki.iotivity.org/initialize_setting)    
+[IoTivity wiki 보안 리소스 메니저](https://wiki.iotivity.org/security_resource_manager)    
+
+위 문서들을 참조하면 OCPersistentStorage를 설정하는 부분에 \*.dat 파일에 대한 경로를 지정하는 부분이 있다.
+그리고 보안 리소스 메니저 부분에 보면 해당 \*.dat 파일에 내용을 토대로 ACL(Access Control List)를 만드는 등의 작업을 한다. 해당 cbor(Concise Binary Object Representation)파일에 있는 데이터를 토대로 보안 정책을 설립하는 것으로 보인다. 따라서 해당 파일에 href부분에 리소스 접근하는 URI를 설정해주지 않으면 entityHandler에 도달하지도 못하고 요청이 reject된다고 볼 수 있다.
+
+해당 CBOR파일을 어떻게 만드느냐에 대한 고민이 있을 수 있는데 json파일 형태로 만들면, 같은 이름에 다른 확장자(.dat)로 scons으로 빌드 시 알아서 json2cbor 과 같은 툴을 이용해서 바이너리 형태로 바꾸어준다. 따라서 소스코드 작성과 더불에 적절한 configuration을 설정을 json파일로 해주어야지만 제대로 동작하게 된다.
