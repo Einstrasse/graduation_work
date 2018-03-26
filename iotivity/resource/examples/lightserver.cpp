@@ -73,7 +73,7 @@ public:
 public:
     /// Constructor
     LightResource()
-        :m_name("Main light"), m_switch(false), m_brightness(0), m_lightUri("/a/light"),
+        :m_name("Main light"), m_switch(false), m_brightness(0), m_lightUri("/eine/light"),
                 m_resourceHandle(nullptr) {
         // Initialize representation
         m_lightRep.setUri(m_lightUri);
@@ -100,6 +100,7 @@ public:
 
         EntityHandler cb = std::bind(&LightResource::entityHandler, this,PH::_1);
 
+        cout << "@@@@@@@@@" << resourceURI << ' ' << resourceTypeName << '\n';
         // This will internally create and register the resource.
         OCStackResult result = OCPlatform::registerResource(
                                     m_resourceHandle, resourceURI, resourceTypeName,

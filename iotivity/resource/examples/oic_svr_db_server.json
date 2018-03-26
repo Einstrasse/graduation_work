@@ -32,13 +32,13 @@
             {
                 "aceid": 4,
                 "subject": { "uuid": "31393139-3139-3139-3139-313931393139" },
-                "resources": [{ "href": "/a/light" }],
+                "resources": [{ "href": "/eine/light" }],
                 "permission": 7
             },
             {
                 "aceid": 5,
                 "subject": { "conntype": "anon-clear" },
-                "resources": [{ "href": "/a/light" }],
+                "resources": [{ "href": "/eine/light" }],
                 "permission": 7
             }
         ],
