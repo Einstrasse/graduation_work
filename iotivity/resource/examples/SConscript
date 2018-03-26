@@ -105,6 +105,7 @@ example_names = [
     'devicediscoveryclient',
     'simpleserverHQ',
     'simpleclientHQ',
+    'lightserver',
 ]
 
 if target_os not in ['windows', 'msys_nt']:
