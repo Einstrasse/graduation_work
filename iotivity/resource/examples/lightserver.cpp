@@ -64,7 +64,7 @@ public:
     /// Access this property from a TB client
     std::string m_name;
     bool m_switch;
-    int m_birghtness;
+    int m_brightness;
     std::string m_lightUri;
     OCResourceHandle m_resourceHandle;
     OCRepresentation m_lightRep;
@@ -73,13 +73,13 @@ public:
 public:
     /// Constructor
     LightResource()
-        :m_name("Main light"), m_switch(false), m_birghtness(0), m_lightUri("/a/light"),
+        :m_name("Main light"), m_switch(false), m_brightness(0), m_lightUri("/a/light"),
                 m_resourceHandle(nullptr) {
         // Initialize representation
         m_lightRep.setUri(m_lightUri);
 
         m_lightRep.setValue("switch", m_switch);
-        m_lightRep.setValue("birghtness", m_birghtness);
+        m_lightRep.setValue("brightness", m_brightness);
         m_lightRep.setValue("name", m_name);
     }
 
@@ -125,7 +125,7 @@ public:
     // sending out.
     OCRepresentation get() {
         m_lightRep.setValue("switch", m_switch);
-        m_lightRep.setValue("birghtness", m_birghtness);
+        m_lightRep.setValue("brightness", m_brightness);
 
         return m_lightRep;
     }
@@ -145,13 +145,13 @@ public:
                 cout << "\t\t\t\t" << "switch not found in the representation" << endl;
             }
 
-            if (rep.getValue("birghtness", m_birghtness))
+            if (rep.getValue("brightness", m_brightness))
             {
-                cout << "\t\t\t\t" << "birghtness: " << m_birghtness << endl;
+                cout << "\t\t\t\t" << "brightness: " << m_brightness << endl;
             }
             else
             {
-                cout << "\t\t\t\t" << "birghtness not found in the representation" << endl;
+                cout << "\t\t\t\t" << "brightness not found in the representation" << endl;
             }
         }
         catch (exception& e)
