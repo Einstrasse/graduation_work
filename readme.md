@@ -931,3 +931,10 @@ Simulator에서 보낸 요청이 lightserver 어플리케이션의 entityHandler
 그리고 보안 리소스 메니저 부분에 보면 해당 \*.dat 파일에 내용을 토대로 ACL(Access Control List)를 만드는 등의 작업을 한다. 해당 cbor(Concise Binary Object Representation)파일에 있는 데이터를 토대로 보안 정책을 설립하는 것으로 보인다. 따라서 해당 파일에 href부분에 리소스 접근하는 URI를 설정해주지 않으면 entityHandler에 도달하지도 못하고 요청이 reject된다고 볼 수 있다.
 
 해당 CBOR파일을 어떻게 만드느냐에 대한 고민이 있을 수 있는데 json파일 형태로 만들면, 같은 이름에 다른 확장자(.dat)로 scons으로 빌드 시 알아서 json2cbor 과 같은 툴을 이용해서 바이너리 형태로 바꾸어준다. 따라서 소스코드 작성과 더불에 적절한 configuration을 설정을 json파일로 해주어야지만 제대로 동작하게 된다.
+
+IoTivity Wiki의 초기설정 문서를 참조하면, 서버에서 (Secure) 버전과 아닌 버전이 있다. PersistentStorage를 설정해주느냐 아니냐에 대한 차이인데, 해당 설정을 빼고 실행을 해 보았는데, 정상적으로 동작하지 않았다. 그래서 다음 명령어로 새로 빌드한 후 실행해 보았다.
+
+```
+scons resource SECURED=0
+```
+해당 빌드 커맨드로 빌드를 할 시, PersistentStorage를 Disable한 코드에서도 제대로 동작하게 된다. Default value는 SECURED=1이고, 그 경우 PersistentStorage에 접근 정책에 관한 JSON 파일을 빌드한 CBOR파일을 넣어주어야 정상적으로 동작한다. default가 secured인 것으로 보아 보안적으로 안전하게 제작하는 것을 권고하는 것으로 보인다.
