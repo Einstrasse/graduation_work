@@ -46,3 +46,9 @@ sudo minicom -b 9600 -o -D /dev/ttyAMA0
 ```
 echo "Serveral Data" > /dev/ttyAMA0
 ```
+
+src디렉토리에 있는 turn.c를 빌드한 파일을 이용해서 서보모터를 제어하는 시그널을 아두이노에 보낼 수 있다.
+다음과 같은 사용방식으로 시그널을 라즈베리파이에서 GPIO로 보낼 수 있다.
+```
+/usr/bin/turn 180
+```
