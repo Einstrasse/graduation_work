@@ -29,6 +29,7 @@ using namespace OC;
 using namespace std;
 namespace PH = std::placeholders;
 
+static const char* SVR_DB_FILE_NAME = "./oic_svr_db_server.dat";
 
 // Set of strings for each of platform Info fields
 std::string gPlatformId = "DEADBEEF-CAFE-EEEE-0000-000000000001";
@@ -58,12 +59,22 @@ OCPlatformInfo platformInfo;
 // true: secure resource
 bool isSecure = false;
 
+void turn_servo_motor(int angle) {
+    char cmd[32];
+    memset(cmd, 0, sizeof(cmd));
+    snprintf(cmd, 31, "turn %d", angle);
+    system(cmd);
+}
+
 class LightResource {
 public:
     /// Access this property from a TB client
     std::string m_name;
     bool m_switch;
     int m_brightness;
+    int m_defaultAngle;
+    int m_onAngle;
+    int m_offAngle;
     std::string m_lightUri;
     OCResourceHandle m_resourceHandle;
     OCRepresentation m_lightRep;
@@ -72,11 +83,14 @@ public:
 public:
     /// Constructor
     LightResource()
-        :m_name("Main light"), m_switch(false), m_brightness(0), m_lightUri("/eine/light"),
-                m_resourceHandle(nullptr) {
+        :m_name("Einstrasse' light"), m_switch(false), m_brightness(0), m_defaultAngle(90),
+        m_onAngle(105), m_offAngle(75), m_lightUri("/eine/light"),
+        m_resourceHandle(nullptr) {
         // Initialize representation
         m_lightRep.setUri(m_lightUri);
-
+        m_lightRep.setValue("defaultAngle", m_defaultAngle);
+        m_lightRep.setValue("onAngle", m_onAngle);
+        m_lightRep.setValue("offAngle", m_offAngle);
         m_lightRep.setValue("switch", m_switch);
         m_lightRep.setValue("brightness", m_brightness);
         m_lightRep.setValue("name", m_name);
@@ -95,7 +109,7 @@ public:
         std::string resourceInterface = DEFAULT_INTERFACE;
 
         // OCResourceProperty is defined ocstack.h
-        uint8_t resourceProperty;
+        uint8_t resourceProperty = OC_DISCOVERABLE | OC_OBSERVABLE;
 
         EntityHandler cb = std::bind(&LightResource::entityHandler, this,PH::_1);
 
@@ -103,7 +117,7 @@ public:
         // This will internally create and register the resource.
         OCStackResult result = OCPlatform::registerResource(
                                     m_resourceHandle, resourceURI, resourceTypeName,
-                                    resourceInterface, cb, OC_DISCOVERABLE | OC_OBSERVABLE);
+                                    resourceInterface, cb, resourceProperty);
 
         if (OC_STACK_OK != result)
         {
@@ -126,6 +140,9 @@ public:
     OCRepresentation get() {
         m_lightRep.setValue("switch", m_switch);
         m_lightRep.setValue("brightness", m_brightness);
+        m_lightRep.setValue("defaultAngle", m_defaultAngle);
+        m_lightRep.setValue("onAngle", m_onAngle);
+        m_lightRep.setValue("offAngle", m_offAngle);
 
         return m_lightRep;
     }
@@ -136,15 +153,6 @@ public:
     void put(OCRepresentation& rep)
     {
         try {
-            if (rep.getValue("switch", m_switch))
-            {
-                cout << "\t\t\t\t" << "switch: " << m_switch << endl;
-            }
-            else
-            {
-                cout << "\t\t\t\t" << "switch not found in the representation" << endl;
-            }
-
             if (rep.getValue("brightness", m_brightness))
             {
                 cout << "\t\t\t\t" << "brightness: " << m_brightness << endl;
@@ -152,6 +160,49 @@ public:
             else
             {
                 cout << "\t\t\t\t" << "brightness not found in the representation" << endl;
+            }
+
+            if (rep.getValue("defaultAngle", m_defaultAngle))
+            {
+                cout << "\t\t\t\t" << "defaultAngle: " << m_defaultAngle << endl;
+            }
+            else
+            {
+                cout << "\t\t\t\t" << "defaultAngle not found in the representation" << endl;
+            }
+
+            if (rep.getValue("onAngle", m_onAngle))
+            {
+                cout << "\t\t\t\t" << "onAngle: " << m_onAngle << endl;
+            }
+            else
+            {
+                cout << "\t\t\t\t" << "onAngle not found in the representation" << endl;
+            }
+
+            if (rep.getValue("offAngle", m_offAngle))
+            {
+                cout << "\t\t\t\t" << "offAngle: " << m_offAngle << endl;
+            }
+            else
+            {
+                cout << "\t\t\t\t" << "offAngle not found in the representation" << endl;
+            }
+
+            if (rep.getValue("switch", m_switch))
+            {
+                cout << "\t\t\t\t" << "switch: " << m_switch << endl;
+                if (m_switch) {
+                    cout << "\t\t\t\t" << "Turn on light Switch for angle " << m_onAngle << endl;
+                    turn_servo_motor(m_onAngle);
+                } else {
+                    cout << "\t\t\t\t" << "Turn off light Switch for angle " << m_offAngle << endl;
+                    turn_servo_motor(m_offAngle);
+                }
+            }
+            else
+            {
+                cout << "\t\t\t\t" << "switch not found in the representation" << endl;
             }
         }
         catch (exception& e)
@@ -285,40 +336,6 @@ private:
                     cout << "Delete request received" << endl;
                 }
             }
-
-            /*
-            // Observer request handler
-
-            if(requestFlag & RequestHandlerFlag::ObserverFlag) {
-                ObservationInfo observationInfo = request->getObservationInfo();
-                if(ObserveAction::ObserveRegister == observationInfo.action) {
-                    m_interestedObservers.push_back(observationInfo.obsId);
-                } else if(ObserveAction::ObserveUnregister == observationInfo.action)
-                {
-                    m_interestedObservers.erase(std::remove(
-                                                                m_interestedObservers.begin(),
-                                                                m_interestedObservers.end(),
-                                                                observationInfo.obsId),
-                                                                m_interestedObservers.end());
-                }
-
-                pthread_t threadId;
-
-                cout << "\t\trequestFlag : Observer\n";
-                gObservation = 1;
-                static int startedThread = 0;
-
-                // Observation happens on a different thread in ChangeLightRepresentation function.
-                // If we have not created the thread already, we will create one here.
-                if(!startedThread)
-                {
-                    pthread_create (&threadId, NULL, ChangeLightRepresentation, (void *)this);
-                    startedThread = 1;
-                }
-                ehResult = OC_EH_OK;
-            }
-            */
-
         } else {
             std::cout << "Request invalid" << std::endl;
         }
@@ -327,59 +344,7 @@ private:
     }
 };
 
-/*
-// ChangeLightRepresentaion is an observation function,
-// which notifies any changes to the resource to stack
-// via notifyObservers
-void * ChangeLightRepresentation (void *param)
-{
-    LightResource* lightPtr = (LightResource*) param;
 
-    // This function continuously monitors for the changes
-    while (1)
-    {
-        sleep (3);
-
-        if (gObservation)
-        {
-            // If under observation if there are any changes to the light resource
-            // we call notifyObservors
-            //
-            // For demostration we are changing the power value and notifying.
-            lightPtr->m_power += 10;
-
-            cout << "\nPower updated to : " << lightPtr->m_power << endl;
-            cout << "Notifying observers with resource handle: " << lightPtr->getHandle() << endl;
-
-            OCStackResult result = OC_STACK_OK;
-
-            if(isListOfObservers)
-            {
-                std::shared_ptr<OCResourceResponse> resourceResponse =
-                            {std::make_shared<OCResourceResponse>()};
-
-                resourceResponse->setResourceRepresentation(lightPtr->get(), DEFAULT_INTERFACE);
-
-                result = OCPlatform::notifyListOfObservers(  lightPtr->getHandle(),
-                                                             lightPtr->m_interestedObservers,
-                                                             resourceResponse);
-            }
-            else
-            {
-                result = OCPlatform::notifyAllObservers(lightPtr->getHandle());
-            }
-
-            if(OC_STACK_NO_OBSERVERS == result)
-            {
-                cout << "No More observers, stopping notifications" << endl;
-                gObservation = 0;
-            }
-        }
-    }
-
-    return NULL;
-}
-*/
 
 void DeletePlatformInfo()
 {
@@ -482,14 +447,30 @@ void PrintIntro() {
     std::cout << "3. GET\t- Fetch resouce attributes\n";
 }
 
+static FILE* client_open(const char* path, const char* mode)
+{
+    char const * filename = path;
+    if (0 == strcmp(path, OC_SECURITY_DB_DAT_FILE_NAME))
+    {
+        filename = SVR_DB_FILE_NAME;
+    }
+    else if (0 == strcmp(path, OC_INTROSPECTION_FILE_NAME))
+    {
+        filename = "lightserver_introspection.dat";
+    }
+    return fopen(filename, mode);
+}
+
 
 int main() {
     PrintIntro();
 
+    OCPersistentStorage ps {client_open, fread, fwrite, fclose, unlink };
     //Platform setting and start
     PlatformConfig cfg {
         OC::ServiceType::InProc,
         OC::ModeType::Server,
+        &ps,
         "0.0.0.0", // By setting to "0.0.0.0", it binds to all available interfaces
         0,         // Uses randomly available port
         OC::QualityOfService::LowQos,
@@ -507,10 +488,6 @@ int main() {
             gHardwareVersion, gFirmwareVersion, gSupportLink, gSystemTime);
 
     result = OCPlatform::registerPlatformInfo(platformInfo);
-
-
-
-
 
     if (result != OC_STACK_OK)
     {
