@@ -63,7 +63,9 @@ void turn_servo_motor(int angle) {
     char cmd[32];
     memset(cmd, 0, sizeof(cmd));
     snprintf(cmd, 31, "turn %d", angle);
-    system(cmd);
+    int ret = system(cmd);
+    (void)ret;
+
 }
 
 class LightResource {
@@ -470,14 +472,11 @@ int main() {
     PlatformConfig cfg {
         OC::ServiceType::InProc,
         OC::ModeType::Server,
-        &ps,
-        "0.0.0.0", // By setting to "0.0.0.0", it binds to all available interfaces
-        0,         // Uses randomly available port
-        OC::QualityOfService::LowQos,
+        &ps
     };
     cfg.transportType = static_cast<OCTransportAdapter>(OCTransportAdapter::OC_ADAPTER_IP | 
                                                         OCTransportAdapter::OC_ADAPTER_TCP);
-    // cfg.QoS = OC::QualityOfService::LowQos;
+    cfg.QoS = OC::QualityOfService::LowQos;
     OCPlatform::Configure(cfg);
     OC_VERIFY(OCPlatform::start() == OC_STACK_OK);
     std::cout << "Setting Platform Info finished. Server Starts....\n";
@@ -506,9 +505,6 @@ int main() {
     } else {
         std::cout << "Device Registration succeed\n";
     }
-
-
-
 
     try
     {
