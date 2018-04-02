@@ -56,6 +56,9 @@ if target_os not in ['darwin', 'ios', 'android']:
     # Build examples
     SConscript('examples/SConscript')
 
+    # Build Einstrasse's graduation_work project
+    SConscript('einstrasse/SConscript')
+
 if target_os in ['linux', 'windows', 'darwin', 'msys_nt']:
     if target_os == 'darwin':
         env.Command('#/out/darwin/iotivity-csdk.framework', None,

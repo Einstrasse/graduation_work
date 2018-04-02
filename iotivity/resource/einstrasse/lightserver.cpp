@@ -95,7 +95,7 @@ public:
         std::string resourceInterface = DEFAULT_INTERFACE;
 
         // OCResourceProperty is defined ocstack.h
-        uint8_t resourceProperty;
+        uint8_t resourceProperty = OC_DISCOVERABLE | OC_OBSERVABLE;
 
         EntityHandler cb = std::bind(&LightResource::entityHandler, this,PH::_1);
 
@@ -103,7 +103,7 @@ public:
         // This will internally create and register the resource.
         OCStackResult result = OCPlatform::registerResource(
                                     m_resourceHandle, resourceURI, resourceTypeName,
-                                    resourceInterface, cb, OC_DISCOVERABLE | OC_OBSERVABLE);
+                                    resourceInterface, cb, resourceProperty);
 
         if (OC_STACK_OK != result)
         {
