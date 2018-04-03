@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Iotivity-client</string>
     <string name="title_activity_settings">Settings</string>
+    <string name="title_light_setting">Light</string>
 
     <!-- Strings related to Settings -->
 
