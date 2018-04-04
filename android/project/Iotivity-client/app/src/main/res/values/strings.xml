@@ -2,6 +2,9 @@
     <string name="app_name">Iotivity-client</string>
     <string name="title_activity_settings">Settings</string>
     <string name="title_light_setting">Light</string>
+    <string name="servo_default_angle_setting">Servo Motor default angle</string>
+    <string name="servo_on_angle_setting">Servo Motor Turn On angle</string>
+    <string name="servo_off_angle_setting">Servo Motor Turn Off angle</string>
 
     <!-- Strings related to Settings -->
 
