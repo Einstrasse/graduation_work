@@ -1,0 +1,50 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="edu.skku.einstrasse.iotivity_client.HomeFragment">
+
+    <!-- TODO: Update Home fragment layout -->
+
+    <TextView
+        android:id="@+id/home_fragment_light_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Light"
+        android:textSize="35dp"
+        android:layout_gravity="center"
+        android:textColor="#000000"/>
+
+
+    <Button
+        android:id="@+id/home_fragment_connect_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Connect"
+        android:enabled="true"
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/home_fragment_light_on_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:text="On"
+            />
+        <Button
+            android:id="@+id/home_fragment_light_off_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:text="Off"
+            />
+
+    </LinearLayout>
+
+</LinearLayout>

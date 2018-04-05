@@ -1,5 +1,7 @@
 package edu.skku.einstrasse.iotivity_client;
 
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,22 +16,28 @@ import android.widget.TextView;
 
 public class DashboardActivity extends AppCompatActivity {
 
-    private TextView mTextMessage;
+    FragmentManager fragmentManager = null;
+    FragmentTransaction fragmentTransaction = null;
+    HomeFragment homeFragment = null;
+    AlarmFragment alarmFragment = null;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            fragmentTransaction = fragmentManager.beginTransaction();
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    mTextMessage.setText(R.string.title_home);
+                    fragmentTransaction.replace(R.id.dashboard_fragment_position, homeFragment);
+                    fragmentTransaction.commit();
                     return true;
                 case R.id.navigation_dashboard:
-                    mTextMessage.setText(R.string.title_dashboard);
+                    //TODO: Navigation Dashboard에 어떤 기능을 넣을지 구상하고 넣을 것
                     return true;
                 case R.id.navigation_alarm:
-                    mTextMessage.setText(R.string.title_alarm);
+                    fragmentTransaction.replace(R.id.dashboard_fragment_position, alarmFragment);
+                    fragmentTransaction.commit();
                     return true;
             }
             return false;
@@ -59,8 +67,14 @@ public class DashboardActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
+        fragmentManager = getFragmentManager();
 
-        mTextMessage = (TextView) findViewById(R.id.message);
+        homeFragment = new HomeFragment();
+        alarmFragment = new AlarmFragment();
+        fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.dashboard_fragment_position, homeFragment);
+        fragmentTransaction.commit();
+
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
     }
