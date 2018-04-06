@@ -22,6 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Connect"
+        android:textColor="#000000"
         android:enabled="true"
         />
     <LinearLayout
@@ -34,6 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:enabled="false"
+            android:textColor="#D7D7D7"
             android:text="On"
             />
         <Button
@@ -42,6 +44,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:enabled="false"
+            android:textColor="#D7D7D7"
             android:text="Off"
             />
 

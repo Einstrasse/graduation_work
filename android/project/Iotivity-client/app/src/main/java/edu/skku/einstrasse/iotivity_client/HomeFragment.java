@@ -1,6 +1,7 @@
 package edu.skku.einstrasse.iotivity_client;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 //import android.support.v4.app.Fragment;
@@ -94,22 +95,30 @@ public class HomeFragment extends Fragment implements
                     case IDLE:
                         mLightConnectBtn.setEnabled(true);
                         mLightConnectBtn.setText("Connect");
+                        mLightConnectBtn.setTextColor(Color.rgb(0,0,0));
                         mLightOnBtn.setEnabled(false);
+                        mLightOnBtn.setTextColor(Color.rgb(215,215,215));
                         mLightOffBtn.setEnabled(false);
+                        mLightOffBtn.setTextColor(Color.rgb(215,215,215));
                         ConnectionState = TaskState.IDLE;
                         break;
                     case PROCESSING:
                         mLightConnectBtn.setEnabled(false);
                         mLightConnectBtn.setText("CONNECTING...");
                         mLightOnBtn.setEnabled(false);
+                        mLightOnBtn.setTextColor(Color.rgb(215,215,215));
                         mLightOffBtn.setEnabled(false);
+                        mLightOffBtn.setTextColor(Color.rgb(215,215,215));
                         ConnectionState = TaskState.PROCESSING;
                         break;
                     case DONE:
                         mLightConnectBtn.setEnabled(false);
                         mLightConnectBtn.setText("Connected!");
+                        mLightConnectBtn.setTextColor(Color.BLUE);
                         mLightOnBtn.setEnabled(true);
+                        mLightOnBtn.setTextColor(Color.rgb(0,0,0));
                         mLightOffBtn.setEnabled(true);
+                        mLightOffBtn.setTextColor(Color.rgb(0,0,0));
                         ConnectionState = TaskState.DONE;
                         break;
                     default:
@@ -117,6 +126,42 @@ public class HomeFragment extends Fragment implements
                 }
             }
         });
+    }
+
+    /*
+     * Send GET Method for Light Resource
+     */
+    private void getLightResourceRepresentation() {
+        lg("Request GET method for Light Resource");
+        Map<String, String> queryParams = new HashMap<>();
+        try {
+            mFoundLightResource.get(queryParams, this);
+        } catch (OcException e) {
+            Log.e(TAG, e.toString());
+            lg("Error occured while invoking GET Method for Light Resource");
+        }
+    }
+    private void putLightRepresentation(boolean switchMode) {
+        mLight.setSwitch(switchMode);
+        //mLight.setDefaultAngle(90);
+//        mLight.setOnAngle(105);
+//        mLight.setOffAngle(75);
+        // TODO : SharedPreference에서 Angle 값 가져오기 필요
+        OcRepresentation rep = null;
+        try {
+            rep = mLight.getOcRepresentation();
+        } catch (OcException e) {
+            Log.e(TAG, e.toString());
+            lg("Failed to get OcRepresentation from Light object");
+        }
+        Map<String, String> queryParams = new HashMap<>();
+
+        try {
+            mFoundLightResource.put(rep, queryParams, this);
+        } catch (OcException e) {
+            Log.e(TAG, e.toString());
+            lg("Error occured while invoking PUT Method Request for Light resource");
+        }
     }
 
     private void IoTivityInit() {
@@ -170,7 +215,28 @@ public class HomeFragment extends Fragment implements
         lg("URI of the resource :" + resourceUri);
         lg("Host addr of the resource :" + hostAddr);
 
-        showToast("Resource Found!", Toast.LENGTH_SHORT);
+        lg("---- List of resource types ----");
+        for (String resType : ocResource.getResourceTypes()) {
+            lg("\n" + resType);
+        }
+        lg("---- List of resource interface ----");
+        for (String resIf : ocResource.getResourceInterfaces()) {
+            lg("\n" + resIf);
+        }
+        lg("---- List of resource connectivity type ----");
+        for (OcConnectivityType connType : ocResource.getConnectivityTypeSet()) {
+            lg("\n" + connType);
+        }
+
+        if (resourceUri.equals("/eine/light")) {
+            mFoundLightResource = ocResource;
+            getLightResourceRepresentation();
+            showToast("Light Resource Found!", Toast.LENGTH_SHORT);
+        }
+
+        // TODO : 리소스 개수가 늘어날 경우를 대비해서, 해당 콜백 로직 변경 필요
+        // TODO : 리소스 탐색 부분을 유저가 신경쓰지 않도록 추상화 필요
+
         setConnectionBtnState(TaskState.DONE);
     }
 
@@ -186,7 +252,17 @@ public class HomeFragment extends Fragment implements
 
     @Override
     public synchronized void onGetCompleted(List<OcHeaderOption> list, OcRepresentation ocRepresentation) {
+        lg("GET request successfully finished");
+        lg("Resource URI: " + ocRepresentation.getUri());
 
+        try {
+            mLight.setOcRepresentation(ocRepresentation);
+        } catch (OcException e) {
+            lg(e.toString());
+            lg("Failed to read the attributes of a light resource");
+        }
+        lg("Light attributes:\n");
+        lg(mLight.toString());
     }
     @Override
     public synchronized void onGetFailed(Throwable throwable) {
@@ -195,11 +271,13 @@ public class HomeFragment extends Fragment implements
 
     @Override
     public synchronized void onPutCompleted(List<OcHeaderOption> list, OcRepresentation ocRepresentation) {
-
+        lg("Put Request Successfully Done");
     }
     @Override
     public synchronized void onPutFailed(Throwable throwable) {
-
+        Log.e(TAG, "PUT Request Failed... : " + throwable.toString());
+        lg("Put request Failed");
+        showToast("Light Switch Control request failed T.T", Toast.LENGTH_SHORT);
     }
 
     @Override
@@ -245,7 +323,7 @@ public class HomeFragment extends Fragment implements
         mLightConnectBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO: Connect btn 눌렀을 시 이벤트 핸들러 구현
+                //TODO: Connect btn 을 궂이 누르지 않도록 버튼 추상화 필요
                 Log.e(ETAG, "Connected Button Pressed");
 
                 IoTivityInit();
@@ -258,14 +336,14 @@ public class HomeFragment extends Fragment implements
         mLightOnBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO: On btn 눌렀을 시 이벤트 핸들러 구현
+                putLightRepresentation(true);
             }
         });
 
         mLightOffBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO: Off btn 눌렀을 시 이벤트 핸들러 구현
+                putLightRepresentation(false);
             }
         });
         setConnectionBtnState(TaskState.IDLE);
