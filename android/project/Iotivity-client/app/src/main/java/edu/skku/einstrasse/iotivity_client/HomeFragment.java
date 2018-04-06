@@ -10,6 +10,24 @@ import android.app.Fragment;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
+
+import org.iotivity.base.ModeType;
+import org.iotivity.base.OcConnectivityType;
+import org.iotivity.base.OcException;
+import org.iotivity.base.OcHeaderOption;
+import org.iotivity.base.OcPlatform;
+import org.iotivity.base.OcRepresentation;
+import org.iotivity.base.OcResource;
+import org.iotivity.base.OcResourceIdentifier;
+import org.iotivity.base.PlatformConfig;
+import org.iotivity.base.QualityOfService;
+import org.iotivity.base.ServiceType;
+
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -20,17 +38,179 @@ import android.widget.Button;
  * Use the {@link HomeFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements
+        OcPlatform.OnResourceFoundListener,
+        OcResource.OnGetListener,
+        OcResource.OnPutListener,
+        OcResource.OnPostListener {
 
-    private Button lightConnectBtn;
-    private Button lightOnBtn;
-    private Button lightOffBtn;
+    // Constants
+    private final static String TAG = HomeFragment.class.getSimpleName();
+    private final static String ETAG = "Einstrasse@@@";
+
+    //UI Components
+    private Button mLightConnectBtn;
+    private Button mLightOnBtn;
+    private Button mLightOffBtn;
+
+    // Internal data
+    private TaskState ConnectionState = TaskState.IDLE;
+
+    // Resource Data
+    private Map<OcResourceIdentifier, OcResource> mFoundResources = new HashMap<>();
+    private OcResource mFoundLightResource = null;
+    private Light mLight = new Light();
+
+    private static enum TaskState {
+        IDLE, PROCESSING, DONE
+    }
 
     private OnFragmentInteractionListener mListener;
 
     public HomeFragment() {
         // Required empty public constructor
     }
+
+    /*
+     * Show up the toast message from worker thread
+     * It provides UI thread communication interface
+     */
+    private void showToast(final String msg, final int len){
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(getActivity().getApplicationContext(), msg, len).show();
+            }
+        });
+    };
+
+    /*
+     * Handles UI Component State. In this case, target is Connection Button
+     */
+    private void setConnectionBtnState(final TaskState state) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                switch(state) {
+                    case IDLE:
+                        mLightConnectBtn.setEnabled(true);
+                        mLightConnectBtn.setText("Connect");
+                        mLightOnBtn.setEnabled(false);
+                        mLightOffBtn.setEnabled(false);
+                        ConnectionState = TaskState.IDLE;
+                        break;
+                    case PROCESSING:
+                        mLightConnectBtn.setEnabled(false);
+                        mLightConnectBtn.setText("CONNECTING...");
+                        mLightOnBtn.setEnabled(false);
+                        mLightOffBtn.setEnabled(false);
+                        ConnectionState = TaskState.PROCESSING;
+                        break;
+                    case DONE:
+                        mLightConnectBtn.setEnabled(false);
+                        mLightConnectBtn.setText("Connected!");
+                        mLightOnBtn.setEnabled(true);
+                        mLightOffBtn.setEnabled(true);
+                        ConnectionState = TaskState.DONE;
+                        break;
+                    default:
+                        return;
+                }
+            }
+        });
+    }
+
+    private void IoTivityInit() {
+        Context context = getActivity().getApplicationContext();
+        PlatformConfig platformConfig = new PlatformConfig(
+                getActivity(),
+                context,
+                ServiceType.IN_PROC,
+                ModeType.CLIENT,
+                "0.0.0.0",
+                0,
+                QualityOfService.LOW
+        );
+        Log.e(ETAG, "Configuring IoTivity Platform");
+        OcPlatform.Configure(platformConfig);
+    }
+
+    private void findLightResource() {
+        String lightRequestUri = OcPlatform.WELL_KNOWN_QUERY + "?rt=core.light";
+
+        try {
+            OcPlatform.findResource("",
+                    lightRequestUri,
+                    EnumSet.of(OcConnectivityType.CT_DEFAULT),
+                    this
+            );
+        } catch (OcException e) {
+            Log.e(TAG, e.toString());
+            Log.e(ETAG, "Find resource failed");
+        }
+
+    }
+
+    @Override
+    public synchronized void onResourceFound(OcResource ocResource) {
+        lg("resource found!!");
+        if (null == ocResource) {
+            lg("Found resource is invalid!");
+            return;
+        }
+
+        if (mFoundResources.containsKey(ocResource.getUniqueIdentifier())) {
+            lg("Found a previous discovered resource again T.T");
+        } else {
+            lg("Found resource for the first time on server ID: " + ocResource.getServerId());
+            mFoundResources.put(ocResource.getUniqueIdentifier(), ocResource);
+        }
+
+        String resourceUri = ocResource.getUri();
+        String hostAddr = ocResource.getHost();
+        lg("URI of the resource :" + resourceUri);
+        lg("Host addr of the resource :" + hostAddr);
+
+        showToast("Resource Found!", Toast.LENGTH_SHORT);
+        setConnectionBtnState(TaskState.DONE);
+    }
+
+    @Override
+    public synchronized void onFindResourceFailed(Throwable throwable, String uri) {
+        Log.e(ETAG, "resource found Failed T.T!!");
+        Log.e(ETAG, "Requested URI: " + uri);
+        if (ConnectionState == TaskState.PROCESSING) {
+            showToast("Find Resource Failed", Toast.LENGTH_SHORT);
+            setConnectionBtnState(TaskState.IDLE);
+        }
+    }
+
+    @Override
+    public synchronized void onGetCompleted(List<OcHeaderOption> list, OcRepresentation ocRepresentation) {
+
+    }
+    @Override
+    public synchronized void onGetFailed(Throwable throwable) {
+
+    }
+
+    @Override
+    public synchronized void onPutCompleted(List<OcHeaderOption> list, OcRepresentation ocRepresentation) {
+
+    }
+    @Override
+    public synchronized void onPutFailed(Throwable throwable) {
+
+    }
+
+    @Override
+    public synchronized void onPostCompleted(List<OcHeaderOption> list, OcRepresentation ocRepresentation) {
+
+    }
+    @Override
+    public synchronized  void onPostFailed(Throwable throwable) {
+
+    }
+
 
     /**
      * Use this factory method to create a new instance of
@@ -50,8 +230,8 @@ public class HomeFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
+
     }
 
     @Override
@@ -59,35 +239,36 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View inflated = inflater.inflate(R.layout.fragment_home, container, false);
-        lightConnectBtn = (Button) inflated.findViewById(R.id.home_fragment_connect_btn);
-        lightOnBtn = (Button) inflated.findViewById(R.id.home_fragment_light_on_btn);
-        lightOffBtn = (Button) inflated.findViewById(R.id.home_fragment_light_off_btn);
-
-        lightConnectBtn.setOnClickListener(new View.OnClickListener() {
+        mLightConnectBtn = (Button) inflated.findViewById(R.id.home_fragment_connect_btn);
+        mLightOnBtn = (Button) inflated.findViewById(R.id.home_fragment_light_on_btn);
+        mLightOffBtn = (Button) inflated.findViewById(R.id.home_fragment_light_off_btn);
+        mLightConnectBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //TODO: Connect btn 눌렀을 시 이벤트 핸들러 구현
-                Log.e("Einstrasse@@@", "Connected Button Pressed");
+                Log.e(ETAG, "Connected Button Pressed");
 
-                lightOnBtn.setEnabled(true);
-                lightOffBtn.setEnabled(true);
-                lightConnectBtn.setEnabled(false);
+                IoTivityInit();
+                setConnectionBtnState(TaskState.PROCESSING);
+                findLightResource();
+
             }
         });
 
-        lightOnBtn.setOnClickListener(new View.OnClickListener() {
+        mLightOnBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //TODO: On btn 눌렀을 시 이벤트 핸들러 구현
             }
         });
 
-        lightOffBtn.setOnClickListener(new View.OnClickListener() {
+        mLightOffBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //TODO: Off btn 눌렀을 시 이벤트 핸들러 구현
             }
         });
+        setConnectionBtnState(TaskState.IDLE);
         return inflated;
     }
 
@@ -101,6 +282,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
@@ -128,5 +310,9 @@ public class HomeFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    private void lg(final String txt) {
+        Log.e(ETAG, txt);
     }
 }
