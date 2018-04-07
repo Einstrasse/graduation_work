@@ -144,8 +144,8 @@ public class HomeFragment extends Fragment implements
     private void putLightRepresentation(boolean switchMode) {
         mLight.setSwitch(switchMode);
         //mLight.setDefaultAngle(90);
-//        mLight.setOnAngle(105);
-//        mLight.setOffAngle(75);
+        mLight.setOnAngle(88);
+        mLight.setOffAngle(105);
         // TODO : SharedPreference에서 Angle 값 가져오기 필요
         OcRepresentation rep = null;
         try {
