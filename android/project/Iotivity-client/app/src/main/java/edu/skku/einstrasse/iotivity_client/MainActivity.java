@@ -252,7 +252,7 @@ public class MainActivity extends Activity implements
      */
     private void putLightRepresentation() {
         //set new values
-        mLight.setState(true);
+        mLight.setSwitch(true);
         mLight.setBrightness(15);
 
         msg("Putting light representation...");
@@ -322,7 +322,7 @@ public class MainActivity extends Activity implements
      */
     private void postLightRepresentation() {
         //set new values
-        mLight.setState(false);
+        mLight.setSwitch(false);
         mLight.setBrightness(105);
 
         msg("Posting light representation...");
@@ -369,7 +369,7 @@ public class MainActivity extends Activity implements
         }
 
         //setting new values
-        mLight.setState(true);
+        mLight.setSwitch(true);
         mLight.setBrightness(55);
         msg("Posting again light representation...");
         OcRepresentation representation2 = null;

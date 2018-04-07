@@ -72,7 +72,7 @@ public class Light {
         return mSwitch;
     }
 
-    public void setState(boolean swt) {
+    public void setSwitch(boolean swt) {
         this.mSwitch = swt;
     }
 
