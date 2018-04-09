@@ -52,3 +52,22 @@ src디렉토리에 있는 turn.c를 빌드한 파일을 이용해서 서보모�
 ```
 /usr/bin/turn 180
 ```
+## 2. 서비스 등록
+lightserver를 포함한 IoTivity 서버들을 적절히 제어하기 위해서 서비스를 등록한다. 라즈베리파이의 /usr/sbin/service 파일은 POSIX 쉘 스크립트이며, 해당 파일은 service.sh라는 이름으로 저장되어 있다.
+
+## 3. Sqlite 연동
+sqlite는 경량화된 DBMS이다. 알람 기능을 위해서 알람관련 데이터를 저장하기 위해서 sqlite를 사용한다. 다음 명령어를 통해 설치할 수 있다.
+
+```
+sudo apt install -y sqlite
+```
+
+개발의 편의를 위해서 SQLite GUI Client App인 SQLite Studio를 설치한다.
+해당 앱은 다음 사이트에서 다운로드 가능하다
+[SQLite Studio Homepage](https://sqlitestudio.pl/index.rvt)    
+
+SQLite Studio를 열면 다음과 같은 에러 메시지가 나타날 수 있다.
+```
+[10:48:23] Cannot load plugin DbSqliteCipher. Error details: Cannot load library /home/bobgil/Downloads/SQLiteStudio/plugins/libDbSqliteCipher.so: (libcrypto.so.1: cannot open shared object file: No such file or directory)
+```
+DbSqliteCipher라는 플러그인을 불러오지 못하는 모습이다.
