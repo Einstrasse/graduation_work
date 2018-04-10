@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <edu.skku.einstrasse.iotivity_client.RangedIntegerSelectDialogPreference
+        android:defaultValue="90"
+        android:key="servo_default_angle"
+        android:title="@string/servo_default_angle_setting"
+        android:positiveButtonText="Apply Setting"
+        android:negativeButtonText="Cancel"
+        />
+
+    <edu.skku.einstrasse.iotivity_client.RangedIntegerSelectDialogPreference
+        android:defaultValue="105"
+        android:key="servo_on_angle"
+        android:title="@string/servo_on_angle_setting"
+        android:positiveButtonText="Apply Setting"
+        android:negativeButtonText="Cancel"
+        />
+
+    <edu.skku.einstrasse.iotivity_client.RangedIntegerSelectDialogPreference
+        android:defaultValue="75"
+        android:key="servo_off_angle"
+        android:title="@string/servo_off_angle_setting"
+        android:positiveButtonText="Apply Setting"
+        android:negativeButtonText="Cancel"
+        />
+
+
+</PreferenceScreen>
