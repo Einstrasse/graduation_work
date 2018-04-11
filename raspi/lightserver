@@ -1,0 +1,80 @@
+#!/bin/bash
+
+set -e
+
+BINARY_CWD="/home/pi/Projects/"
+#BINARY_NAME="lightserver"
+BINARY_NAME="run_light_server.sh"
+BINARY_FULL_PATH=${BINARY_CWD}${BINARY_NAME}
+
+# /etc/init.d/lightserver: start and stop the IoTivity Light Control server daemon
+
+test -x ${BINARY_FULL_PATH} || exit 0
+
+echo "Binary exists!";
+echo ${BINARY_FULL_PATH} 
+
+. /lib/lsb/init-functions
+
+PWD=$BINARY_CWD
+
+# Are you running from init?
+run_by_init() {
+	([ "$previous" ] && [ "$runlevel" ]) || [ "$runlevel" = S ]
+}
+
+check_for_upstart() {
+	if init_is_upstart; then
+	exit $1
+	fi
+}
+
+check_privsep_dir() {
+	if [ ! -d /var/run/lightserverd ]; then
+	mkdir /var/run/lightserverd
+	chmod 0755 /var/run/lightserverd
+	fi
+}
+
+check_dev_null() {
+	if [ ! -c /dev/null ]; then
+	if [ "$1" = log_end_msg ]; then
+		log_end_msg 1 || true
+	fi
+	if ! run_by_init; then
+		log_action_msg "/dev/null is not a character device!" || true
+	fi
+	exit 1
+	fi
+}
+
+case "$1" in
+	start)
+#		check_for_upstart 1
+#		check_privsep_dir
+#		check_dev_null
+#		log_daemon_msg "Starting IoTivity Light Server" "lightserverd" || true
+#		if start-stop-daemon --start --quiet --oknodo --pidfile /var/run/lightserverd.pid --exec ${BINARY_FULL_PATH}; then
+#			log_end_msg 0 || true
+#		else
+#			log_end_msg 1 || true
+#		fi
+		${BINARY_FULL_PATH}
+		;;
+
+	stop)
+		pkill lightserver
+#		check_for_upstart 0
+#		log_daemon_msg "Stopping IoTivity Light Server" "lightserverd" || true
+#		if start-stop-daemon --stop --quiet --oknodo --pidfile /var/run/lightserverd.pid; then
+#			log_end_msg 0 || true
+#		else
+#			log_end_msg 1 || true
+#		fi
+		;;
+	*)
+		log_action_msg "Usage: /etc/init.d/lightserver {start|stop|status}" || true
+		exit 1
+esac
+
+exit 0
