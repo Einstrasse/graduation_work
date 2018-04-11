@@ -82,3 +82,21 @@ SQLite Studio를 열면 다음과 같은 에러 메시지가 나타날 수 있�
 [10:48:23] Cannot load plugin DbSqliteCipher. Error details: Cannot load library /home/bobgil/Downloads/SQLiteStudio/plugins/libDbSqliteCipher.so: (libcrypto.so.1: cannot open shared object file: No such file or directory)
 ```
 DbSqliteCipher라는 플러그인을 불러오지 못하는 모습이다. 일단은 크게 상관없어 보인다.
+
+## 4. 타임존 설정
+알람이 정상적으로 동작하도록 하기 위해서 UTC를 KST로 바꾸어 주어야 한다.
+타임존은 `/etc/localtime` 파일에 따라 설정된다.
+기존에는  `/usr/share/zoneinfo/Etc/UTC`의 심볼릭 링크로 설정되어 있기 때문에, `/usr/share/zoneinfo/Asia/Seoul`로 바꾸어주면 된다.
+
+```
+rm /etc/localtime
+ln -s /usr/share/zoneinfo/Asia/Seoul /etc/localtime
+```
+
+## 5. NTP 설정
+라즈비안을 시간 동기화 서버로 사용할 것이 아니라면 NTP는 불필요하며, timedatectl에서 NTP를 enable시킬 수 있다.
+
+```
+timedatectl status
+```
+여기서 NTP Synchronized, NTP enabled와 같은 설정으로 확인할 수 있다. 지금 현재상태는 Enabled된 상태이므로 따로 체크할 일은 없다.
