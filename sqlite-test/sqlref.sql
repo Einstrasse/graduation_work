@@ -1,3 +1,4 @@
+# Table Creation
 
 CREATE TABLE temporal_alarm (
     id      INTEGER PRIMARY KEY AUTOINCREMENT
@@ -24,3 +25,16 @@ CREATE TABLE weekly_alarm (
     enabled CHAR    NOT NULL
                     DEFAULT (1) 
 );
+
+# weekly_alarm for Lecture Insert
+
+INSERT INTO weekly_alarm(`name`, `hour`, `min`, `day`)
+VALUES("THU, FRI Lecture", 8, 0, 24),
+("TUE Lecture", 9, 30, 2),
+("MON Lecture", 12, 0, 1),
+("WED Lecture", 11, 0, 4);
+
+# Select Today's weekly alaram
+
+SELECT `hour`, `min` FROM weekly_alarm WHERE enabled=1 AND (day & 1) <> 0;
+SELECT * FROM weekly_alarm WHERE enabled=1 AND (day & 1) <> 0;

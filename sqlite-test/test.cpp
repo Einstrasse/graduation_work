@@ -13,7 +13,7 @@ int main() {
 		fprintf(stderr, "Cannot open db file :%s\n", db_file_path);
 		return 0;
 	} else {
-		printf("DB file Success\n");
+		printf("DB file open Success\n");
 	}
 	sqlite3_close(db);
 }
