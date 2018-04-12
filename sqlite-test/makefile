@@ -1,4 +1,4 @@
-all: test insert select
+all: test insert select check_for_alarm
 
 test: test.cpp
 	g++ -o test test.cpp -lsqlite3
@@ -8,3 +8,9 @@ insert: insert.cpp
 
 select: select.cpp
 	g++ -o select select.cpp -lsqlite3 -std=c++11
+
+check_for_alarm: check_for_alarm.cpp
+	g++ -o check_for_alarm check_for_alarm.cpp -lsqlite3 -std=c++11
+
+clean:
+	rm -f ./test ./insert ./select ./check_for_alarm

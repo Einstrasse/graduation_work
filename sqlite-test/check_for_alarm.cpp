@@ -9,13 +9,14 @@ using namespace std;
 const char* db_file_path = "./test.db";
 
 const int DAY_CODE[] = {64, 1, 2, 4, 8, 16, 32};
-
+void lightctl(bool on) {
+	if (on)
+		system("turn 88");
+	else
+		system("turn 105");
+}
 static int callback(void* arg, int num_col, char** col_val, char **col_name) {
-	printf("----------- Print Row ------------\n");
-	for (int i=0; i < num_col; i++) {
-		printf("%s: %s\n", col_name[i], col_val[i]);
-	}
-	printf("======== Print Row End =========\n");
+	lightctl(true);
 	return 0;
 }
 
@@ -23,6 +24,7 @@ int main(int argc, char** argv) {
 	sqlite3 *db;
 	char *zErrMsg = 0;
 	int rc = sqlite3_open(db_file_path, &db);
+	char sql[256];
 	int day_code;
 	time_t raw_time;
 	tm * time_info;
@@ -41,8 +43,8 @@ int main(int argc, char** argv) {
 		printf("DB file open Success\n");
 	}
 	
-	char *sql = "SELECT `id`, `name`, `hour`, `min`, `day`, `enabled` FROM weekly_alarm;";
-	printf("SQL: %s\n", sql)
+	sprintf(sql, "SELECT * FROM weekly_alarm WHERE `enabled`=1 AND (`day` & %d) <> 0 AND `hour`=%d AND `min`=%d LIMIT 1;", day_code, current_hour, current_min);
+	cout << sql << endl;
 	rc = sqlite3_exec(db, sql, callback, (void*)0, &zErrMsg);
 	
 	if (SQLITE_OK != rc) {
