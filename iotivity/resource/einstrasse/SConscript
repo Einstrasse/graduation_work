@@ -49,6 +49,9 @@ einstrasse_env.AppendUnique(CPPPATH=[
 
 einstrasse_env.PrependUnique(LIBS=['coap'])
 
+# append sqlite3 libs
+einstrasse_env.AppendUnique(LIBS=['sqlite3'])
+
 if target_os not in ['msys_nt', 'windows']:
     einstrasse_env.AppendUnique(LIBS=['connectivity_abstraction'])
 
@@ -101,7 +104,8 @@ def make_single_file_cpp_program(program_name):
 # Source files and Targets
 ######################################################################
 example_names = [
-    'lightserver'
+    'lightserver',
+    'alarmserver'
 ]
 
 # if target_os not in ['windows', 'msys_nt']:
