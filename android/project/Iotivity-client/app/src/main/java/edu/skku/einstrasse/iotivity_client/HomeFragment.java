@@ -55,12 +55,12 @@ public class HomeFragment extends Fragment implements
     private Button mLightOffBtn;
 
     // Internal data
-    private TaskState ConnectionState = TaskState.IDLE;
+    static private TaskState ConnectionState = TaskState.IDLE;
 
     // Resource Data
-    private Map<OcResourceIdentifier, OcResource> mFoundResources = new HashMap<>();
-    private OcResource mFoundLightResource = null;
-    private Light mLight = new Light();
+    static private Map<OcResourceIdentifier, OcResource> mFoundResources = new HashMap<>();
+    static private OcResource mFoundLightResource = null;
+    static private Light mLight = new Light();
 
     private static enum TaskState {
         IDLE, PROCESSING, DONE
@@ -346,7 +346,7 @@ public class HomeFragment extends Fragment implements
                 putLightRepresentation(false);
             }
         });
-        setConnectionBtnState(TaskState.IDLE);
+        setConnectionBtnState(ConnectionState);
         return inflated;
     }
 
