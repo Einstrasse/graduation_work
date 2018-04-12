@@ -1,4 +1,4 @@
-package edu.skku.einstrasse.iotivity_client;
+package edu.skku.einstrasse.iotivity_client.oic.res;
 
 /**
  * Created by hg958 on 2018-04-03.

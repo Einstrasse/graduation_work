@@ -1,4 +1,4 @@
-package edu.skku.einstrasse.iotivity_client;
+package edu.skku.einstrasse.iotivity_client.activity;
 
 import android.content.res.Configuration;
 import android.os.Bundle;

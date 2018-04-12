@@ -1,5 +1,6 @@
-package edu.skku.einstrasse.iotivity_client;
+package edu.skku.einstrasse.iotivity_client.fragment;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -29,6 +30,8 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import edu.skku.einstrasse.iotivity_client.R;
 
 
 /**
@@ -82,11 +85,19 @@ public class AlarmFragment extends Fragment implements
     }
 
     private void showToast(final String msg, final int len){
-        getActivity().runOnUiThread(new Runnable() {
-            public void run() {
-                Toast.makeText(getActivity().getApplicationContext(), msg, len).show();
-            }
-        });
+        final Activity activity = getActivity();
+        if (null != activity) {
+            activity.runOnUiThread(new Runnable() {
+                public void run() {
+                    Context context = activity.getApplicationContext();
+                    if (null != context) {
+                        Toast.makeText(context, msg, len).show();
+                    } else {
+                        lg("getApplicationContext() function returns null!!");
+                    }
+                }
+            });
+        }
     };
 
     private void findAlarmResource() {

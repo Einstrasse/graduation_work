@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="edu.skku.einstrasse.iotivity_client.DashboardActivity">
+    tools:context="edu.skku.einstrasse.iotivity_client.activity.DashboardActivity">
 
     <FrameLayout
         android:id="@+id/dashboard_fragment_position"
