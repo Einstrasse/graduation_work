@@ -32,7 +32,7 @@
             {
                 "aceid": 4,
                 "subject": { "uuid": "31393139-3139-3139-3139-313931393139" },
-                "resources": [{ "href": "/eine/light" }],
+                "resources": [{ "href": "/eine/alarm/weekly" }],
                 "permission": 7
             },
             {
