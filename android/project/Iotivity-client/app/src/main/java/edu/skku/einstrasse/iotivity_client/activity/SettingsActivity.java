@@ -2,10 +2,13 @@ package edu.skku.einstrasse.iotivity_client.activity;
 
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.support.v7.app.ActionBar;
@@ -13,11 +16,13 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.util.List;
 
 import edu.skku.einstrasse.iotivity_client.R;
 import edu.skku.einstrasse.iotivity_client.activity.AppCompatPreferenceActivity;
+import edu.skku.einstrasse.iotivity_client.fragment.HomeFragment;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -35,33 +40,50 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
      */
-    private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange(Preference preference, Object value) {
-            /*
-            String stringValue = value.toString();
 
-            if (preference instanceof ListPreference) {
-                // For list preferences, look up the correct display value in
-                // the preference's 'entries' list.
-                ListPreference listPreference = (ListPreference) preference;
-                int index = listPreference.findIndexOfValue(stringValue);
+    // Constant
+    private final static String TAG = HomeFragment.class.getSimpleName();
+    private final static String ETAG = "Einstrasse@@@";
 
-                // Set the summary to reflect the new value.
-                preference.setSummary(
-                        index >= 0
-                                ? listPreference.getEntries()[index]
-                                : null);
-
-            } else {
-                // For all other preferences, set the summary to the value's
-                // simple string representation.
-                preference.setSummary(stringValue);
-            }
-            */
-            return true;
+    private void showToast(final String msg, final int len){
+        final Activity activity = this;
+        if (null != activity) {
+            activity.runOnUiThread(new Runnable() {
+                public void run() {
+                    Context context = activity.getApplicationContext();
+                    if (null != context) {
+                        Toast.makeText(context, msg, len).show();
+                    } else {
+                        lg("getApplicationContext() function returns null!!");
+                    }
+                }
+            });
         }
     };
+
+    private SharedPreferences.OnSharedPreferenceChangeListener listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+//            String new_val = sharedPreferences.getString(key, "Unknown");
+//            lg("SharedPreference changes! " + key + " = " + new_val);
+            showToast("Setting Value updated Successfully!", Toast.LENGTH_SHORT);
+
+        }
+    };
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        pref.registerOnSharedPreferenceChangeListener(listener);
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        pref.unregisterOnSharedPreferenceChangeListener(listener);
+    }
 
     /**
      * Helper method to determine if the device has an extra-large screen. For
@@ -72,31 +94,12 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
     }
 
-    /**
-     * Binds a preference's summary to its value. More specifically, when the
-     * preference's value is changed, its summary (line of text below the
-     * preference title) is updated to reflect the value. The summary is also
-     * immediately updated upon calling this method. The exact display format is
-     * dependent on the type of preference.
-     *
-     * @see #sBindPreferenceSummaryToValueListener
-     */
-    private static void bindPreferenceSummaryToValue(Preference preference) {
-        // Set the listener to watch for value changes.
-        preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
-
-        // Trigger the listener immediately with the preference's
-        // current value.
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-                PreferenceManager
-                        .getDefaultSharedPreferences(preference.getContext())
-                        .getString(preference.getKey(), ""));
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
+
     }
 
     @Override
@@ -148,6 +151,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 || LightPreferenceFragment.class.getName().equals(fragmentName);
     }
 
+
     /**
      * This fragment show general perferences only. It is used when the
      * activity is showing a two-pane settings Ui.
@@ -156,6 +160,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     public static class LightPreferenceFragment extends PreferenceFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
+            lg("LightPreferenceFragment onCreate event~!");
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_light);
             setHasOptionsMenu(false);
@@ -167,6 +172,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             return super.onOptionsItemSelected(item);
         }
 
+    }
+
+    private static void lg(final String txt) {
+        Log.e(ETAG, txt);
     }
 
 }

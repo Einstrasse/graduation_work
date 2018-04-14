@@ -2,10 +2,12 @@ package edu.skku.einstrasse.iotivity_client.fragment;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 //import android.support.v4.app.Fragment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.app.Fragment;
@@ -156,9 +158,17 @@ public class HomeFragment extends Fragment implements
     private void putLightRepresentation(boolean switchMode) {
         mLight.setSwitch(switchMode);
         //mLight.setDefaultAngle(90);
-        mLight.setOnAngle(88);
-        mLight.setOffAngle(105);
-        // TODO : SharedPreference에서 Angle 값 가져오기 필요
+        Context context = getActivity();
+        int on_angle = 88;
+        int off_angle = 105;
+        if (null != context) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            on_angle = pref.getInt(getString(R.string.key_on_angle), 88);
+            off_angle = pref.getInt(getString(R.string.key_off_angle), 105);
+        }
+        mLight.setOnAngle(on_angle);
+        mLight.setOffAngle(off_angle);
+
         OcRepresentation rep = null;
         try {
             rep = mLight.getOcRepresentation();
