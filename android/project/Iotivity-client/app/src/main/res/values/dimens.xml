@@ -3,4 +3,8 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="recycler_view_default_pad">10sp</dimen>
+    <dimen name="short_day_font_size">20sp</dimen>
+    <dimen name="short_day_height">23sp</dimen>
+    <dimen name="short_day_width">20sp</dimen>
 </resources>

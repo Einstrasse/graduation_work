@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -32,6 +33,9 @@ import java.util.List;
 import java.util.Map;
 
 import edu.skku.einstrasse.iotivity_client.R;
+import edu.skku.einstrasse.iotivity_client.adapter.AlarmListAdapter;
+import edu.skku.einstrasse.iotivity_client.oic.res.AlarmJSONData;
+import edu.skku.einstrasse.iotivity_client.oic.res.WeeklyAlarmHandler;
 
 
 /**
@@ -53,6 +57,8 @@ public class AlarmFragment extends Fragment implements
     //UI Components
     private Button btn_get_data = null;
     private RecyclerView alarm_recycler_view = null;
+    private AlarmListAdapter adapter = null;
+    private RecyclerView.LayoutManager layout_manager = null;
     private FloatingActionButton fab_add_alarm = null;
 
     // Internal data
@@ -60,6 +66,8 @@ public class AlarmFragment extends Fragment implements
 
     // Resource Data
     static private Map<OcResourceIdentifier, OcResource> mFoundResources = new HashMap<>();
+    static private OcResource mFoundWeeklyAlarmHandler = null;
+    static private WeeklyAlarmHandler mWeeklyAlarmHandler = null;
 
 //    private static enum TaskState {
 //        IDLE, PROCESSING, DONE
@@ -148,6 +156,8 @@ public class AlarmFragment extends Fragment implements
         }
 
         if (resourceUri.equals("/eine/alarm/weekly")) {
+            mFoundWeeklyAlarmHandler = ocResource;
+            getWeeklyAlarmHandlerResourceRepresentation();
 //            mFoundLightResource = ocResource;
 //            getLightResourceRepresentation();
             showToast("Weekly Alarm Resource Found!", Toast.LENGTH_SHORT);
@@ -155,6 +165,20 @@ public class AlarmFragment extends Fragment implements
 
         // TODO : 리소스 개수가 늘어날 경우를 대비해서, 해당 콜백 로직 변경 필요
         // TODO : 리소스 탐색 부분을 유저가 신경쓰지 않도록 추상화 필요
+    }
+
+    /*
+     * Send GET Method for WeeklyAlarmHandler Resource
+     */
+    private void getWeeklyAlarmHandlerResourceRepresentation() {
+        lg("Request GET method for Weekly Alarm Handler Resource");
+        Map<String, String> queryParams = new HashMap<>();
+        try {
+            mFoundWeeklyAlarmHandler.get(queryParams, this);
+        } catch (OcException e) {
+            Log.e(TAG, e.toString());
+            lg("Error occured while invoking GET Method for Light Resource");
+        }
     }
 
     @Override
@@ -171,11 +195,27 @@ public class AlarmFragment extends Fragment implements
 
         //TODO: 이 디버그용 코드를 삭제하고 WeeklyAlarmHandler Class만들어서 거기로 빼버리기
         try {
+
+            lg((String)ocRepresentation.getValue("name"));
+            mWeeklyAlarmHandler.setOcRepresentation(ocRepresentation);
             String serializedData = ocRepresentation.getValue("serializedData");
             int alarmCount = ocRepresentation.getValue("alarmCount");
+            lg("Serialized Data:" + serializedData);
+            lg("alarmCount:" + alarmCount);
         } catch (OcException e) {
             lg(e.toString());
         }
+
+        adapter.setData(mWeeklyAlarmHandler.getWeeklyAlarmList());
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                adapter.notifyDataSetChanged();
+            }
+        });
+
+//        adapter = new AlarmListAdapter(mWeeklyAlarmHandler.getWeeklyAlarmList());
+//        alarm_recycler_view.setAdapter(adapter);
     }
     @Override
     public synchronized void onGetFailed(Throwable throwable) {
@@ -186,6 +226,10 @@ public class AlarmFragment extends Fragment implements
     public void onCreate(Bundle savedInstanceState) {
         lg("## AlarmFragment onCreate");
         super.onCreate(savedInstanceState);
+        if (null == mWeeklyAlarmHandler) {
+            mWeeklyAlarmHandler = new WeeklyAlarmHandler();
+        }
+
     }
 
     @Override
@@ -197,6 +241,10 @@ public class AlarmFragment extends Fragment implements
 //        btn_get_data = (Button) inflated.findViewById(R.id.btn_get_data);
         alarm_recycler_view = (RecyclerView) inflated.findViewById(R.id.alarm_recycler_view);
         fab_add_alarm = (FloatingActionButton) inflated.findViewById(R.id.fab_add_alarm);
+        layout_manager = new LinearLayoutManager(getActivity());
+        alarm_recycler_view.setLayoutManager(layout_manager);
+        adapter = new AlarmListAdapter();
+        alarm_recycler_view.setAdapter(adapter);
         IoTivityInit();
         findAlarmResource();
 
@@ -205,17 +253,19 @@ public class AlarmFragment extends Fragment implements
 
 
 
-//    @Override
-//    public void onAttach(Context context) {
-//        lg("## AlarmFragment onAttach");
-//        super.onAttach(context);
+    @Override
+    public void onAttach(Context context) {
+        lg("## AlarmFragment onAttach");
+        super.onAttach(context);
+
+
 //        if (context instanceof OnFragmentInteractionListener) {
 //            mListener = (OnFragmentInteractionListener) context;
 //        } else {
 //            throw new RuntimeException(context.toString()
 //                    + " must implement OnFragmentInteractionListener");
 //        }
-//    }
+    }
 
     /*
     @Override

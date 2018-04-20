@@ -20,8 +20,6 @@ public class Light {
     public static final String DEFAULTANGLE_KEY = "defaultAngle";
     public static final String ONANGLE_KEY = "onAngle";
     public static final String OFFANGLE_KEY = "offAngle";
-//    public static final String STATE_KEY = "state";
-//    public static final String POWER_KEY = "power";
 
     private String mName;
     private boolean mSwitch;
