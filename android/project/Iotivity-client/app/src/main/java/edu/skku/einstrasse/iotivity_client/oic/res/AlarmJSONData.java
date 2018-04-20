@@ -33,6 +33,12 @@ public class AlarmJSONData {
         public int getDay() {
             return day;
         }
+        public String getName() {
+            return name;
+        }
+        public boolean getEnabled() {
+            return enabled;
+        }
         void dump() {
             Log.e("Einstrasse@@@", "id:" + id);
             Log.e("Einstrasse@@@", "name:" + name);

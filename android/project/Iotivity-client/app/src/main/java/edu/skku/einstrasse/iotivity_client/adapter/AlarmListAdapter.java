@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,8 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.View
         public TextView short_day_5;
         public TextView short_day_6;
         public TextView short_day_7;
+        public TextView alarm_name_text;
+        public ToggleButton alarm_enabled_toggle;
         public ViewHolder(View v) {
             super(v);
             alarm_time_text = (TextView) v.findViewById(R.id.alarm_time_text);
@@ -47,7 +50,8 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.View
             short_day_5 = (TextView) v.findViewById(R.id.short_day_5);
             short_day_6 = (TextView) v.findViewById(R.id.short_day_6);
             short_day_7 = (TextView) v.findViewById(R.id.short_day_7);
-
+            alarm_name_text = (TextView) v.findViewById(R.id.alarm_name_text);
+            alarm_enabled_toggle = (ToggleButton) v.findViewById(R.id.alarm_enabled_toggle);
         }
 
     }
@@ -74,6 +78,8 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.View
         lg("onBindViewHolder");
         AlarmJSONData.WeeklyAlarm data = mWeeklyDataset.get(position);
         holder.alarm_time_text.setText(data.getTimeString());
+        holder.alarm_name_text.setText(data.getName());
+        holder.alarm_enabled_toggle.setChecked(data.getEnabled());
         int day = data.getDay();
         if ((day & (1 << (1-1))) == 0) {
             holder.short_day_1.setTextColor(ContextCompat.getColor(IoTivity.getAppContext(), R.color.gray));
