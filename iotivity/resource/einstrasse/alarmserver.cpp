@@ -321,6 +321,15 @@ private:
                 	if (OC_STACK_OK == OCPlatform::sendResponse(pResponse)) {
                 		ehResult = OC_EH_OK;
                 	}
+                } else if (requestType == "DELETE") {
+                	cout << "\t\t\trequestType : DELETE\n";
+                	OCRepresentation rep = request->getResourceRepresentation();
+
+                	pResponse->setResponseResult(OC_EH_OK);
+                	pResponse->setResourceRepresentation(delete_(rep));
+                	if (OC_STACK_OK == OCPlatform::sendResponse(pResponse)) {
+                		ehResult = OC_EH_OK;
+                	}
                 }
     		}
     	} else {
@@ -404,16 +413,7 @@ public:
 			printf("Sqlite query success\n");
 		}
 
-		//debug dump sql queried rows
-		// for (size_t i=0; i < weeklyAlarmList.size(); i++) {
-		// 	auto& item = weeklyAlarmList[i];
-		// 	item.dumpData();
-		// 	cout << '\n' << item.serialize() << '\n';
-		// }
-
-		// cout << "\n\n" << (WeeklyAlarmHandler::serialize(weeklyAlarmList)) << "\n\n";
-		// cout << AlarmHandler::serialize(weeklyAlarmList) << "\n\n";
-
+		
 		sqlite3_close(db);
 
 		m_resourceRep.setValue("alarmCount", (int)weeklyAlarmList.size());
@@ -461,9 +461,10 @@ public:
 			fprintf(stderr, "Sqlite3 sql query failed.. :%s\n", errMsg);
 			sqlite3_free(errMsg);
 			sqlite3_close(db);
-			m_resourceRep.setValue("alarmCount", -1);
-			m_resourceRep.setValue("serializedData", "{}");
-			return m_resourceRep;
+			return get();
+			// m_resourceRep.setValue("alarmCount", -1);
+			// m_resourceRep.setValue("serializedData", "{}");
+			// return m_resourceRep;
 		} else {
 			printf("Sqlite query success\n");
 		}
@@ -536,9 +537,48 @@ public:
 			fprintf(stderr, "Sqlite3 sql query failed %s\n", errMsg);
 			sqlite3_free(errMsg);
 			sqlite3_close(db);
+			return get();
+			// m_resourceRep.setValue("alarmCount", -1);
+			// m_resourceRep.setValue("serializedData", "{}");
+			// return m_resourceRep;
+		} else {
+			printf("Sqlite query success\n");
+		}
+
+		sqlite3_close(db);
+
+		return get();
+	}
+
+	OCRepresentation delete_(OCRepresentation& rep) {
+		sqlite3 *db;
+		char *errMsg = 0;
+		int rc = sqlite3_open(SQLITE3_ALARM_DB_PATH, &db);
+		if (rc) {
+			fprintf(stderr, "SQLite3 file open failed... :%s\n", SQLITE3_ALARM_DB_PATH);
 			m_resourceRep.setValue("alarmCount", -1);
 			m_resourceRep.setValue("serializedData", "{}");
 			return m_resourceRep;
+		} else {
+			printf("SQLite3 file open success!\n");
+		}
+		int id = -1;
+		if (!rep.getValue("m_id", id)) {
+			sqlite3_close(db);
+			return get();
+		}
+		string sql = "DELETE FROM weekly_alarm WHERE `id`=" + to_string(id) + ";";
+
+		rc = sqlite3_exec(db, sql.c_str(), sqliteUpdateCallback, (void*)0, &errMsg);
+		printf("Sqlite3 Exec function returned..\n");
+		if (SQLITE_OK != rc) {
+			fprintf(stderr, "Sqlite3 sql query failed %s\n", errMsg);
+			sqlite3_free(errMsg);
+			sqlite3_close(db);
+			return get();
+			// m_resourceRep.setValue("alarmCount", -1);
+			// m_resourceRep.setValue("serializedData", "{}");
+			// return m_resourceRep;
 		} else {
 			printf("Sqlite query success\n");
 		}
