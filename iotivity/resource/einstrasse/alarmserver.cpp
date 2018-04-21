@@ -180,6 +180,7 @@ class WeeklyAlarm;
 class AlarmHandler;
 static int sqliteSelectCallback(void* arg, int num_col, char** col_val, char** col_name);
 static int sqliteInsertCallback(void* arg, int num_col, char** col_val, char** col_name);
+static int sqliteUpdateCallback(void* arg, int num_col, char** col_val, char** col_name);
 
 //Class for Genarlly used for Alarm Data
 class AlarmHandler {
@@ -311,6 +312,15 @@ private:
                 	if (OC_STACK_OK == OCPlatform::sendResponse(pResponse)) {
                 		ehResult = OC_EH_OK;
                 	}
+                } else if (requestType == "PUT") {
+                	cout << "\t\t\trequestType : PUT\n";
+                	OCRepresentation rep = request->getResourceRepresentation();
+
+                	pResponse->setResponseResult(OC_EH_OK);
+                	pResponse->setResourceRepresentation(put(rep));
+                	if (OC_STACK_OK == OCPlatform::sendResponse(pResponse)) {
+                		ehResult = OC_EH_OK;
+                	}
                 }
     		}
     	} else {
@@ -379,13 +389,14 @@ public:
 			printf("SQLite3 file open success!\n");
 		}
 
-		char *sql = "SELECT `id`, `name`, `hour`, `min`, `day`, `enabled` FROM weekly_alarm;";
+		const char *sql = "SELECT `id`, `name`, `hour`, `min`, `day`, `enabled` FROM weekly_alarm;";
 
 		rc = sqlite3_exec(db, sql, sqliteSelectCallback, (void*) &weeklyAlarmList, &errMsg);
 		printf("Sqlite3 Exec function returned..\n");
 		if (SQLITE_OK != rc) {
-			fprintf(stderr, "Sqlite3 sql query failed\n");
+			fprintf(stderr, "Sqlite3 sql query failed.. %s\n", errMsg);
 			sqlite3_free(errMsg);
+			sqlite3_close(db);
 			m_resourceRep.setValue("alarmCount", -1);
 			m_resourceRep.setValue("serializedData", "{}");
 			return m_resourceRep;
@@ -411,6 +422,8 @@ public:
 		m_resourceRep.setValue("hour", 0);
 		m_resourceRep.setValue("min", 0);
 		m_resourceRep.setValue("day", 0);
+		m_resourceRep.setValue("m_id", 0);
+		m_resourceRep.setValue("enabled", 0);
 		return m_resourceRep;
 	}
 
@@ -439,17 +452,90 @@ public:
 			return get();
 		}
 
-		// hour = stoi(queries["hour"], nullptr, 10);
-		// min = stoi(queries["min"], nullptr, 10);
-		// day = stoi(queries["day"], nullptr, 10);
 
 		snprintf(sql, 511, "INSERT INTO weekly_alarm(`name`, `hour`, `min`, `day`) VALUES(\"%s\", %d, %d, %d);", name.c_str(), hour, min, day);
 
 		rc = sqlite3_exec(db, sql, sqliteInsertCallback, (void*)0, &errMsg);
 		printf("Sqlite3 Exec function returned..\n");
 		if (SQLITE_OK != rc) {
-			fprintf(stderr, "Sqlite3 sql query failed\n");
+			fprintf(stderr, "Sqlite3 sql query failed.. :%s\n", errMsg);
 			sqlite3_free(errMsg);
+			sqlite3_close(db);
+			m_resourceRep.setValue("alarmCount", -1);
+			m_resourceRep.setValue("serializedData", "{}");
+			return m_resourceRep;
+		} else {
+			printf("Sqlite query success\n");
+		}
+
+		sqlite3_close(db);
+
+		return get();
+	}
+
+	OCRepresentation put(OCRepresentation& rep) {
+		sqlite3 *db;
+		char *errMsg = 0;
+		int rc = sqlite3_open(SQLITE3_ALARM_DB_PATH, &db);
+		if (rc) {
+			fprintf(stderr, "SQLite3 file open failed... :%s\n", SQLITE3_ALARM_DB_PATH);
+			m_resourceRep.setValue("alarmCount", -1);
+			m_resourceRep.setValue("serializedData", "{}");
+			return m_resourceRep;
+		} else {
+			printf("SQLite3 file open success!\n");
+		}
+		string name = "-1";
+		int id = -1;
+		int hour = -1;
+		int min = -1;
+		int day = -1;
+		int enabled = -1;
+		rep.getValue("name", name);
+		rep.getValue("enabled", enabled);
+
+		if (!rep.getValue("m_id", id) || !rep.getValue("hour", hour) || !rep.getValue("min", min) || !rep.getValue("day", day)) {
+			sqlite3_close(db);
+			return get();
+		}
+
+		string sql = "UPDATE weekly_alarm SET ";
+
+		vector<string> params;
+		if ("-1" != name) {
+			params.push_back("`name`=\"" + name + "\"");
+		}
+		if (-1 != hour) {
+			params.push_back("`hour`=" + to_string(hour));
+		}
+		if (-1 != min) {
+			params.push_back("`min`=" + to_string(min));
+		}
+		if (-1 != day) {
+			params.push_back("`day`=" + to_string(day));
+		}
+		if (-1 != enabled) {
+			params.push_back("`enabled`=" + to_string(enabled));
+		}
+		for (size_t i = 0; i < params.size(); i++) {
+			sql += params[i];
+			if (i < params.size() - 1) {
+				sql += ", ";
+			}
+		}
+		sql += " WHERE `id`=" + to_string(id) + ";";
+		// UPDATE weekly_alarm
+		// SET `name`="asdf", `hour`=8
+		// WHERE `id`=5;
+
+		cout << "SQL!! " << sql << endl;
+
+		rc = sqlite3_exec(db, sql.c_str(), sqliteUpdateCallback, (void*)0, &errMsg);
+		printf("Sqlite3 Exec function returned..\n");
+		if (SQLITE_OK != rc) {
+			fprintf(stderr, "Sqlite3 sql query failed %s\n", errMsg);
+			sqlite3_free(errMsg);
+			sqlite3_close(db);
 			m_resourceRep.setValue("alarmCount", -1);
 			m_resourceRep.setValue("serializedData", "{}");
 			return m_resourceRep;
@@ -561,6 +647,8 @@ int main() {
 }
 
 static int sqliteSelectCallback(void* arg, int num_col, char** col_val, char** col_name) {
+	(void)col_name;
+	(void)num_col;
 	vector<WeeklyAlarm> *listPtr = (vector<WeeklyAlarm>*) arg;
 	WeeklyAlarm item;
 	item.setId(atoi(col_val[0]));
@@ -574,12 +662,21 @@ static int sqliteSelectCallback(void* arg, int num_col, char** col_val, char** c
 }
 
 static int sqliteInsertCallback(void* arg, int num_col, char** col_val, char** col_name) {
+	(void)arg;
 	//debug output
 	cout << "========== sqliteInsertCallback" << '\n';
 	for (int i=0; i < num_col; i++) {
 		printf("%s: %s\n", col_name[i], col_val[i]);
 	}
 	cout << "sqliteInsertCallback ============" << '\n';
+	return 0;
+}
+
+static int sqliteUpdateCallback(void* arg, int num_col, char** col_val, char** col_name) {
+	(void)arg;
+	(void)num_col;
+	(void)col_val;
+	(void)col_name;
 	return 0;
 }
 
