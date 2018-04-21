@@ -179,6 +179,7 @@ class WeeklyAlarmHandler;
 class WeeklyAlarm;
 class AlarmHandler;
 static int sqliteSelectCallback(void* arg, int num_col, char** col_val, char** col_name);
+static int sqliteInsertCallback(void* arg, int num_col, char** col_val, char** col_name);
 
 //Class for Genarlly used for Alarm Data
 class AlarmHandler {
@@ -261,6 +262,9 @@ class WeeklyAlarmHandler {
 private:
 	string m_name;
 	int m_alarmCount;
+	// int m_hour;
+	// int m_min;
+	// int m_day;
 	string m_serializedData;
 	string m_resourceURI;
 	OCResourceHandle m_resourceHandle;
@@ -298,6 +302,15 @@ private:
                     if(OC_STACK_OK == OCPlatform::sendResponse(pResponse)) {
                         ehResult = OC_EH_OK;
                     }
+                } else if (requestType == "POST") {
+                	cout << "\t\t\trequestType : POST\n";
+                	OCRepresentation rep = request->getResourceRepresentation();
+
+                	pResponse->setResponseResult(OC_EH_OK);
+                	pResponse->setResourceRepresentation(post(rep));
+                	if (OC_STACK_OK == OCPlatform::sendResponse(pResponse)) {
+                		ehResult = OC_EH_OK;
+                	}
                 }
     		}
     	} else {
@@ -309,7 +322,7 @@ private:
 public:
 
 	WeeklyAlarmHandler()
-		:m_name("Weekly Alarms"), m_alarmCount(0), m_serializedData("{}"), 
+		:m_name("Weekly Alarms"), m_alarmCount(0), m_serializedData("{}"),
 		m_resourceURI("/eine/alarm/weekly"), m_resourceHandle(nullptr) {
 		//Initialize representation
 		m_resourceRep.setUri(m_resourceURI);
@@ -394,7 +407,59 @@ public:
 
 		m_resourceRep.setValue("alarmCount", (int)weeklyAlarmList.size());
 		m_resourceRep.setValue("serializedData", AlarmHandler::serialize(weeklyAlarmList));
+		// TODO: dummy for iotivity simulator. if it is not need, erase it!
+		m_resourceRep.setValue("hour", 0);
+		m_resourceRep.setValue("min", 0);
+		m_resourceRep.setValue("day", 0);
 		return m_resourceRep;
+	}
+
+	OCRepresentation post(OCRepresentation& rep) {
+		sqlite3 *db;
+		char *errMsg = 0;
+		int rc = sqlite3_open(SQLITE3_ALARM_DB_PATH, &db);
+		if (rc) {
+			fprintf(stderr, "SQLite3 file open failed... :%s\n", SQLITE3_ALARM_DB_PATH);
+			m_resourceRep.setValue("alarmCount", -1);
+			m_resourceRep.setValue("serializedData", "{}");
+			return m_resourceRep;
+		} else {
+			printf("SQLite3 file open success!\n");
+		}
+		char sql[512];
+		string name = "Alarm";
+		int hour = 0;
+		int min = 0;
+		int day = 0;
+		if(!rep.getValue("name", name)) {
+			name = "Alarm";
+		}
+		if (!rep.getValue("hour", hour) || !rep.getValue("min", min) || !rep.getValue("day", day)) {
+			sqlite3_close(db);
+			return get();
+		}
+
+		// hour = stoi(queries["hour"], nullptr, 10);
+		// min = stoi(queries["min"], nullptr, 10);
+		// day = stoi(queries["day"], nullptr, 10);
+
+		snprintf(sql, 511, "INSERT INTO weekly_alarm(`name`, `hour`, `min`, `day`) VALUES(\"%s\", %d, %d, %d);", name.c_str(), hour, min, day);
+
+		rc = sqlite3_exec(db, sql, sqliteInsertCallback, (void*)0, &errMsg);
+		printf("Sqlite3 Exec function returned..\n");
+		if (SQLITE_OK != rc) {
+			fprintf(stderr, "Sqlite3 sql query failed\n");
+			sqlite3_free(errMsg);
+			m_resourceRep.setValue("alarmCount", -1);
+			m_resourceRep.setValue("serializedData", "{}");
+			return m_resourceRep;
+		} else {
+			printf("Sqlite query success\n");
+		}
+
+		sqlite3_close(db);
+
+		return get();
 	}
 
 	void addType(const std::string& type) const {
@@ -505,6 +570,16 @@ static int sqliteSelectCallback(void* arg, int num_col, char** col_val, char** c
 	item.setDay(atoi(col_val[4]));
 	item.setEnabled(strcmp(col_val[5], "1") == 0 ? true : false);
 	listPtr->push_back(item);
+	return 0;
+}
+
+static int sqliteInsertCallback(void* arg, int num_col, char** col_val, char** col_name) {
+	//debug output
+	cout << "========== sqliteInsertCallback" << '\n';
+	for (int i=0; i < num_col; i++) {
+		printf("%s: %s\n", col_name[i], col_val[i]);
+	}
+	cout << "sqliteInsertCallback ============" << '\n';
 	return 0;
 }
 
