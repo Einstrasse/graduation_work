@@ -1,4 +1,4 @@
-package edu.skku.einstrasse.iotivity_client;
+package edu.skku.einstrasse.iotivity_client.activity;
 
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -6,13 +6,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
+
+import edu.skku.einstrasse.iotivity_client.R;
+import edu.skku.einstrasse.iotivity_client.fragment.AlarmFragment;
+import edu.skku.einstrasse.iotivity_client.fragment.HomeFragment;
 
 public class DashboardActivity extends AppCompatActivity {
 

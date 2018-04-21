@@ -1,4 +1,4 @@
-package edu.skku.einstrasse.iotivity_client;
+package edu.skku.einstrasse.iotivity_client.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -30,6 +30,9 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import edu.skku.einstrasse.iotivity_client.R;
+import edu.skku.einstrasse.iotivity_client.oic.res.Light;
 
 
 /**
