@@ -308,7 +308,8 @@ private:
                 	OCRepresentation rep = request->getResourceRepresentation();
 
                 	pResponse->setResponseResult(OC_EH_OK);
-                	pResponse->setResourceRepresentation(post(rep));
+                	// pResponse->setResourceRepresentation(post(rep));
+                	pResponse->setResourceRepresentation(post(queries));
                 	if (OC_STACK_OK == OCPlatform::sendResponse(pResponse)) {
                 		ehResult = OC_EH_OK;
                 	}
@@ -427,7 +428,7 @@ public:
 		return m_resourceRep;
 	}
 
-	OCRepresentation post(OCRepresentation& rep) {
+	OCRepresentation post(QueryParamsMap& qry) {
 		sqlite3 *db;
 		char *errMsg = 0;
 		int rc = sqlite3_open(SQLITE3_ALARM_DB_PATH, &db);
@@ -441,19 +442,35 @@ public:
 		}
 		char sql[512];
 		string name = "Alarm";
-		int hour = 0;
-		int min = 0;
-		int day = 0;
-		if(!rep.getValue("name", name)) {
+		string hour = 0;
+		string min = 0;
+		string day = 0;
+
+		if (qry.find("name") == qry.end()) {
 			name = "Alarm";
+		} else {
+			name = qry["name"];
 		}
-		if (!rep.getValue("hour", hour) || !rep.getValue("min", min) || !rep.getValue("day", day)) {
+
+		if (qry.find("hour") == qry.end() || qry.find("min") == qry.end() || qry.find("day") == qry.end()) {
 			sqlite3_close(db);
 			return get();
+		} else {
+			hour = qry["hour"];
+			min = qry["min"];
+			day = qry["day"];
 		}
+		// if(!rep.getValue("name", name)) {
+		// 	name = "Alarm";
+		// }
+		// if (!rep.getValue("hour", hour) || !rep.getValue("min", min) || !rep.getValue("day", day)) {
+		// 	sqlite3_close(db);
+		// 	return get();
+		// }
 
 
-		snprintf(sql, 511, "INSERT INTO weekly_alarm(`name`, `hour`, `min`, `day`) VALUES(\"%s\", %d, %d, %d);", name.c_str(), hour, min, day);
+		snprintf(sql, 511, "INSERT INTO weekly_alarm(`name`, `hour`, `min`, `day`) VALUES(\"%s\", %s, %s, %s);"
+			, name.c_str(), hour.c_str(), min.c_str(), day.c_str());
 
 		rc = sqlite3_exec(db, sql, sqliteInsertCallback, (void*)0, &errMsg);
 		printf("Sqlite3 Exec function returned..\n");
