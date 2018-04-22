@@ -517,15 +517,21 @@ public:
 			enabled = qry["enabled"];
 		}
 
-		if (qry.find("m_id") == qry.end() || qry.find("hour") == qry.end() || qry.find("min") == qry.end() || qry.find("day") == qry.end()) {
+		if (qry.find("m_id") == qry.end()) {
 			sqlite3_close(db);
 			return get();
 		}
 
 		id = qry["m_id"];
-		hour = qry["hour"];
-		min = qry["min"];
-		day = qry["day"];
+		if (qry.find("hour") != qry.end()) {
+			hour = qry["hour"];
+		}
+		if (qry.find("min") != qry.end()) {
+			min = qry["min"];
+		}
+		if (qry.find("day") != qry.end()) {
+			day = qry["day"];
+		}
 
 		// rep.getValue("name", name);
 		// rep.getValue("enabled", enabled);
@@ -544,10 +550,15 @@ public:
 		if ("" != enabled) {
 			params.push_back("`enabled`=" + enabled);
 		}
-		
-		params.push_back("`hour`=" + hour);		
-		params.push_back("`min`=" + min);
-		params.push_back("`day`=" + day);
+		if ("" != hour)	{
+			params.push_back("`hour`=" + hour);		
+		}
+		if ("" != min) {
+			params.push_back("`min`=" + min);
+		}
+		if ("" != day) {
+			params.push_back("`day`=" + day);
+		}
 		
 		for (size_t i = 0; i < params.size(); i++) {
 			sql += params[i];
