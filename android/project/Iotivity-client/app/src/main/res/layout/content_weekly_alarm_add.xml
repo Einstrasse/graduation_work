@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_marginLeft="@dimen/view_default_margin"
+    android:layout_marginRight="@dimen/view_default_margin"
+    android:layout_marginTop="@dimen/view_default_margin"
+    android:layout_marginBottom="@dimen/view_default_margin"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="edu.skku.einstrasse.iotivity_client.activity.WeeklyAlarmAddActivity"
+    tools:showIn="@layout/activity_weekly_alarm_add">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/alarm_name"
+        android:textSize="@dimen/setting_item_index_font_size"
+        />
+    <EditText
+        android:id="@+id/alarm_name_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/setting_item_index_font_size"
+        android:text="@string/alarm"
+        />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#a6a5a5"
+        android:paddingBottom="@dimen/setting_item_padding"
+        />
+
+    <TextView
+        android:textSize="@dimen/setting_item_index_font_size"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="@string/time" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/alarm_hour_text"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:hint="@string/time_placeholder"
+            android:textSize="@dimen/alarm_time_index_font_size"
+            android:inputType="time"
+            android:maxLength="2"
+            />
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text=":"
+            android:textSize="@dimen/alarm_time_index_font_size"
+            />
+        <EditText
+            android:id="@+id/alarm_min_text"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:hint="@string/time_placeholder"
+            android:textSize="@dimen/alarm_time_index_font_size"
+            android:inputType="time"
+            android:maxLength="2"
+            />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#a6a5a5"
+        android:paddingBottom="@dimen/setting_item_padding"
+        />
+    <TextView
+        android:textSize="@dimen/setting_item_index_font_size"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="@string/days_repeat" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
+        <CheckBox
+            android:id="@+id/alarm_day_checkbox_1"
+            android:textSize="@dimen/short_day_font_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/short_day_1"
+            />
+        <CheckBox
+            android:id="@+id/alarm_day_checkbox_2"
+            android:textSize="@dimen/short_day_font_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/short_day_2"
+            />
+        <CheckBox
+            android:id="@+id/alarm_day_checkbox_3"
+            android:textSize="@dimen/short_day_font_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/short_day_3"
+            />
+        <CheckBox
+            android:id="@+id/alarm_day_checkbox_4"
+            android:textSize="@dimen/short_day_font_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/short_day_4"
+            />
+        <CheckBox
+            android:id="@+id/alarm_day_checkbox_5"
+            android:textSize="@dimen/short_day_font_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/short_day_5"
+            />
+        <CheckBox
+            android:id="@+id/alarm_day_checkbox_6"
+            android:textSize="@dimen/short_day_font_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/short_day_6"
+            />
+        <CheckBox
+            android:id="@+id/alarm_day_checkbox_7"
+            android:textSize="@dimen/short_day_font_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/short_day_7"
+            />
+
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#a6a5a5"
+        android:paddingBottom="@dimen/setting_item_padding"
+        />
+
+
+
+</LinearLayout>

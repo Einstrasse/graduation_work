@@ -2,6 +2,7 @@ package edu.skku.einstrasse.iotivity_client.fragment;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 import edu.skku.einstrasse.iotivity_client.R;
+import edu.skku.einstrasse.iotivity_client.activity.WeeklyAlarmAddActivity;
 import edu.skku.einstrasse.iotivity_client.adapter.AlarmListAdapter;
 import edu.skku.einstrasse.iotivity_client.oic.res.AlarmJSONData;
 import edu.skku.einstrasse.iotivity_client.oic.res.WeeklyAlarmHandler;
@@ -242,6 +244,20 @@ public class AlarmFragment extends Fragment implements
         alarm_recycler_view = (RecyclerView) inflated.findViewById(R.id.alarm_recycler_view);
         fab_add_alarm = (FloatingActionButton) inflated.findViewById(R.id.fab_add_alarm);
         layout_manager = new LinearLayoutManager(getActivity());
+
+        fab_add_alarm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Activity activity = getActivity();
+                if (null == getActivity()) {
+                    lg("Cannot load activity!");
+                    return;
+                }
+                Intent intent = new Intent(activity, WeeklyAlarmAddActivity.class);
+                startActivity(intent);
+
+            }
+        });
         alarm_recycler_view.setLayoutManager(layout_manager);
         adapter = new AlarmListAdapter();
         alarm_recycler_view.setAdapter(adapter);
