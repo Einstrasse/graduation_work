@@ -6,8 +6,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.View
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
+        public View view;
         public TextView alarm_time_text;
         public TextView short_day_1;
         public TextView short_day_2;
@@ -42,6 +45,7 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.View
         public ToggleButton alarm_enabled_toggle;
         public ViewHolder(View v) {
             super(v);
+            view = v;
             alarm_time_text = (TextView) v.findViewById(R.id.alarm_time_text);
             short_day_1 = (TextView) v.findViewById(R.id.short_day_1);
             short_day_2 = (TextView) v.findViewById(R.id.short_day_2);
@@ -73,13 +77,36 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.View
         return vh;
     }
 
+
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+
         lg("onBindViewHolder");
         AlarmJSONData.WeeklyAlarm data = mWeeklyDataset.get(position);
+        final int pos = position;
+        final int id = data.getId();
         holder.alarm_time_text.setText(data.getTimeString());
         holder.alarm_name_text.setText(data.getName());
         holder.alarm_enabled_toggle.setChecked(data.getEnabled());
+        holder.alarm_enabled_toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                buttonView.setEnabled(false);
+            }
+        });
+//        holder.alarm_enabled_toggle.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Toast.makeText(IoTivity.getAppContext(), "Pos:" + String.valueOf(pos) + "\n" + "ID:" + String.valueOf(id), Toast.LENGTH_SHORT).show();
+//            }
+//        });
+        holder.view.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Toast.makeText(IoTivity.getAppContext(), "Long click!", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
         int day = data.getDay();
         if ((day & (1 << (1-1))) == 0) {
             holder.short_day_1.setTextColor(ContextCompat.getColor(IoTivity.getAppContext(), R.color.gray));
