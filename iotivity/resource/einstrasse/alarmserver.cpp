@@ -308,7 +308,6 @@ private:
                 	OCRepresentation rep = request->getResourceRepresentation();
 
                 	pResponse->setResponseResult(OC_EH_OK);
-                	// pResponse->setResourceRepresentation(post(rep));
                 	pResponse->setResourceRepresentation(post(queries));
                 	if (OC_STACK_OK == OCPlatform::sendResponse(pResponse)) {
                 		ehResult = OC_EH_OK;
@@ -318,7 +317,7 @@ private:
                 	OCRepresentation rep = request->getResourceRepresentation();
 
                 	pResponse->setResponseResult(OC_EH_OK);
-                	pResponse->setResourceRepresentation(put(rep));
+                	pResponse->setResourceRepresentation(put(queries));
                 	if (OC_STACK_OK == OCPlatform::sendResponse(pResponse)) {
                 		ehResult = OC_EH_OK;
                 	}
@@ -327,7 +326,7 @@ private:
                 	OCRepresentation rep = request->getResourceRepresentation();
 
                 	pResponse->setResponseResult(OC_EH_OK);
-                	pResponse->setResourceRepresentation(delete_(rep));
+                	pResponse->setResourceRepresentation(delete_(queries));
                 	if (OC_STACK_OK == OCPlatform::sendResponse(pResponse)) {
                 		ehResult = OC_EH_OK;
                 	}
@@ -491,7 +490,7 @@ public:
 		return get();
 	}
 
-	OCRepresentation put(OCRepresentation& rep) {
+	OCRepresentation put(QueryParamsMap& qry) {
 		sqlite3 *db;
 		char *errMsg = 0;
 		int rc = sqlite3_open(SQLITE3_ALARM_DB_PATH, &db);
@@ -503,45 +502,60 @@ public:
 		} else {
 			printf("SQLite3 file open success!\n");
 		}
-		string name = "-1";
-		int id = -1;
-		int hour = -1;
-		int min = -1;
-		int day = -1;
-		int enabled = -1;
-		rep.getValue("name", name);
-		rep.getValue("enabled", enabled);
+		string name = "";
+		string enabled = "";
+		string id = "";
+		string hour = "";
+		string min = "";
+		string day = "";
 
-		if (!rep.getValue("m_id", id) || !rep.getValue("hour", hour) || !rep.getValue("min", min) || !rep.getValue("day", day)) {
+		if (qry.find("name") != qry.end()) {
+			name = qry["name"];
+		}
+
+		if (qry.find("enabled") != qry.end()) {
+			enabled = qry["enabled"];
+		}
+
+		if (qry.find("m_id") == qry.end() || qry.find("hour") == qry.end() || qry.find("min") == qry.end() || qry.find("day") == qry.end()) {
 			sqlite3_close(db);
 			return get();
 		}
 
+		id = qry["m_id"];
+		hour = qry["hour"];
+		min = qry["min"];
+		day = qry["day"];
+
+		// rep.getValue("name", name);
+		// rep.getValue("enabled", enabled);
+
+		// if (!rep.getValue("m_id", id) || !rep.getValue("hour", hour) || !rep.getValue("min", min) || !rep.getValue("day", day)) {
+		// 	sqlite3_close(db);
+		// 	return get();
+		// }
+
 		string sql = "UPDATE weekly_alarm SET ";
 
 		vector<string> params;
-		if ("-1" != name) {
+		if ("" != name) {
 			params.push_back("`name`=\"" + name + "\"");
 		}
-		if (-1 != hour) {
-			params.push_back("`hour`=" + to_string(hour));
+		if ("" != enabled) {
+			params.push_back("`enabled`=" + enabled);
 		}
-		if (-1 != min) {
-			params.push_back("`min`=" + to_string(min));
-		}
-		if (-1 != day) {
-			params.push_back("`day`=" + to_string(day));
-		}
-		if (-1 != enabled) {
-			params.push_back("`enabled`=" + to_string(enabled));
-		}
+		
+		params.push_back("`hour`=" + hour);		
+		params.push_back("`min`=" + min);
+		params.push_back("`day`=" + day);
+		
 		for (size_t i = 0; i < params.size(); i++) {
 			sql += params[i];
 			if (i < params.size() - 1) {
 				sql += ", ";
 			}
 		}
-		sql += " WHERE `id`=" + to_string(id) + ";";
+		sql += " WHERE `id`=" + id + ";";
 		// UPDATE weekly_alarm
 		// SET `name`="asdf", `hour`=8
 		// WHERE `id`=5;
@@ -567,7 +581,7 @@ public:
 		return get();
 	}
 
-	OCRepresentation delete_(OCRepresentation& rep) {
+	OCRepresentation delete_(QueryParamsMap& qry) {
 		sqlite3 *db;
 		char *errMsg = 0;
 		int rc = sqlite3_open(SQLITE3_ALARM_DB_PATH, &db);
@@ -579,12 +593,17 @@ public:
 		} else {
 			printf("SQLite3 file open success!\n");
 		}
-		int id = -1;
-		if (!rep.getValue("m_id", id)) {
+		string id = "";
+		if (qry.find("m_id") == qry.end()) {
 			sqlite3_close(db);
 			return get();
 		}
-		string sql = "DELETE FROM weekly_alarm WHERE `id`=" + to_string(id) + ";";
+		id = qry["m_id"];
+		// if (!rep.getValue("m_id", id)) {
+		// 	sqlite3_close(db);
+		// 	return get();
+		// }
+		string sql = "DELETE FROM weekly_alarm WHERE `id`=" + id + ";";
 
 		rc = sqlite3_exec(db, sql.c_str(), sqliteUpdateCallback, (void*)0, &errMsg);
 		printf("Sqlite3 Exec function returned..\n");
