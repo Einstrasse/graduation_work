@@ -60,6 +60,8 @@ public class AlarmFragment extends Fragment implements
     private final static String ETAG = "Einstrasse@@@";
     private final static int REQUEST_CODE_ALARM_CREATE = 1;
 
+    private OcResource.OnPutListener onPutListener = null;
+
     //UI Components
     private Button btn_get_data = null;
     private RecyclerView alarm_recycler_view = null;
@@ -242,6 +244,19 @@ public class AlarmFragment extends Fragment implements
         if (IoTivity.getWeeklyAlarmHandler() == null) {
             IoTivity.setWeeklyAlarmHandler(new WeeklyAlarmHandler());
         }
+        if (onPutListener == null) {
+            onPutListener = new OcResource.OnPutListener() {
+                @Override
+                public void onPutCompleted(List<OcHeaderOption> list, OcRepresentation ocRepresentation) {
+                    updateWeeklyAlarmList(ocRepresentation);
+                }
+
+                @Override
+                public void onPutFailed(Throwable throwable) {
+                    lg("Put Method failed T.T");
+                }
+            };
+        }
 //        if (null == mWeeklyAlarmHandler) {
 //            mWeeklyAlarmHandler = new WeeklyAlarmHandler();
 //        }
@@ -274,7 +289,7 @@ public class AlarmFragment extends Fragment implements
             }
         });
         alarm_recycler_view.setLayoutManager(layout_manager);
-        adapter = new AlarmListAdapter();
+        adapter = new AlarmListAdapter(onPutListener);
         alarm_recycler_view.setAdapter(adapter);
         IoTivityInit();
         findAlarmResource();

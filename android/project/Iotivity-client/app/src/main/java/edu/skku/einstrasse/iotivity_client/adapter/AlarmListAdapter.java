@@ -1,5 +1,6 @@
 package edu.skku.einstrasse.iotivity_client.adapter;
 
+import android.app.Activity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -12,8 +13,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import org.iotivity.base.OcException;
+import org.iotivity.base.OcHeaderOption;
+import org.iotivity.base.OcRepresentation;
+import org.iotivity.base.OcResource;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.skku.einstrasse.iotivity_client.IoTivity;
 import edu.skku.einstrasse.iotivity_client.R;
@@ -25,6 +33,7 @@ import edu.skku.einstrasse.iotivity_client.oic.res.AlarmJSONData;
 
 public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.ViewHolder> {
     private List<AlarmJSONData.WeeklyAlarm> mWeeklyDataset = null;
+    private OcResource.OnPutListener mOnPutListener = null;
     private static final String TAG = "Einstrasse@@ Adapter";
 
     private static void lg(final String msg) {
@@ -62,9 +71,11 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.View
     public AlarmListAdapter() {
         mWeeklyDataset = new ArrayList<AlarmJSONData.WeeklyAlarm>();
     }
-    public AlarmListAdapter(List<AlarmJSONData.WeeklyAlarm> weeklyDataset) {
-        mWeeklyDataset = weeklyDataset;
+    public AlarmListAdapter(OcResource.OnPutListener onPutListener) {
+        mWeeklyDataset = new ArrayList<AlarmJSONData.WeeklyAlarm>();
+        mOnPutListener = onPutListener;
     }
+
     public void setData(List<AlarmJSONData.WeeklyAlarm> data) {
         this.mWeeklyDataset = data;
     }
@@ -82,24 +93,12 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.View
     public void onBindViewHolder(ViewHolder holder, int position) {
 
         lg("onBindViewHolder");
-        AlarmJSONData.WeeklyAlarm data = mWeeklyDataset.get(position);
+        final AlarmJSONData.WeeklyAlarm data = mWeeklyDataset.get(position);
         final int pos = position;
         final int id = data.getId();
         holder.alarm_time_text.setText(data.getTimeString());
         holder.alarm_name_text.setText(data.getName());
-        holder.alarm_enabled_toggle.setChecked(data.getEnabled());
-        holder.alarm_enabled_toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                buttonView.setEnabled(false);
-            }
-        });
-//        holder.alarm_enabled_toggle.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Toast.makeText(IoTivity.getAppContext(), "Pos:" + String.valueOf(pos) + "\n" + "ID:" + String.valueOf(id), Toast.LENGTH_SHORT).show();
-//            }
-//        });
+
         holder.view.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -107,28 +106,67 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.View
                 return true;
             }
         });
-        int day = data.getDay();
+        final int day = data.getDay();
         if ((day & (1 << (1-1))) == 0) {
             holder.short_day_1.setTextColor(ContextCompat.getColor(IoTivity.getAppContext(), R.color.gray));
+        } else {
+            holder.short_day_1.setTextColor(ContextCompat.getColor(IoTivity.getAppContext(), R.color.black));
         }
         if ((day & (1 << (2-1))) == 0) {
             holder.short_day_2.setTextColor(ContextCompat.getColor(IoTivity.getAppContext(), R.color.gray));
+        } else {
+            holder.short_day_2.setTextColor(ContextCompat.getColor(IoTivity.getAppContext(), R.color.black));
         }
         if ((day & (1 << (3-1))) == 0) {
             holder.short_day_3.setTextColor(ContextCompat.getColor(IoTivity.getAppContext(), R.color.gray));
+        } else {
+            holder.short_day_3.setTextColor(ContextCompat.getColor(IoTivity.getAppContext(), R.color.black));
         }
         if ((day & (1 << (4-1))) == 0) {
             holder.short_day_4.setTextColor(ContextCompat.getColor(IoTivity.getAppContext(), R.color.gray));
+        } else {
+            holder.short_day_4.setTextColor(ContextCompat.getColor(IoTivity.getAppContext(), R.color.black));
         }
         if ((day & (1 << (5-1))) == 0) {
             holder.short_day_5.setTextColor(ContextCompat.getColor(IoTivity.getAppContext(), R.color.gray));
+        }  else {
+            holder.short_day_5.setTextColor(ContextCompat.getColor(IoTivity.getAppContext(), R.color.black));
         }
         if ((day & (1 << (6-1))) == 0) {
             holder.short_day_6.setTextColor(ContextCompat.getColor(IoTivity.getAppContext(), R.color.gray));
+        }  else {
+            holder.short_day_6.setTextColor(ContextCompat.getColor(IoTivity.getAppContext(), R.color.black));
         }
         if ((day & (1 << (7-1))) == 0) {
             holder.short_day_7.setTextColor(ContextCompat.getColor(IoTivity.getAppContext(), R.color.gray));
+        }  else {
+            holder.short_day_7.setTextColor(ContextCompat.getColor(IoTivity.getAppContext(), R.color.black));
         }
+        // setOnCheckedChangeListener에 반응하지 않도록 잠금
+        holder.alarm_enabled_toggle.setEnabled(false);
+        holder.alarm_enabled_toggle.setChecked(data.getEnabled());
+        holder.alarm_enabled_toggle.setEnabled(true);
+        holder.alarm_enabled_toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (buttonView.isEnabled() == false) return;
+                buttonView.setEnabled(false);
+                Map<String, String> queryParams = new HashMap<>();
+                queryParams.put("m_id", String.valueOf(id));
+                queryParams.put("enabled", isChecked ? "1" : "0");
+                OcRepresentation rep = null;
+                lg("onCheckedChanged! id:" + String.valueOf(id) + "\nChecked: " + (isChecked ? "O" : "X"));
+                try {
+                    rep = IoTivity.getWeeklyAlarmHandler().getOcRepresentation();
+                    IoTivity.getWeeklyAlarmHandlerResource().put(rep, queryParams, mOnPutListener);
+
+                } catch (OcException e) {
+                    lg("Error occured while enabled toggling!");
+                    return;
+                }
+
+            }
+        });
     }
 
     @Override
@@ -137,4 +175,5 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.View
         if (null == mWeeklyDataset) return 0;
         return mWeeklyDataset.size();
     }
+
 }
