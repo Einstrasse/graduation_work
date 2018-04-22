@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.skku.einstrasse.iotivity_client.IoTivity;
 import edu.skku.einstrasse.iotivity_client.R;
 import edu.skku.einstrasse.iotivity_client.activity.WeeklyAlarmAddActivity;
 import edu.skku.einstrasse.iotivity_client.adapter.AlarmListAdapter;
@@ -59,6 +60,8 @@ public class AlarmFragment extends Fragment implements
     private final static String ETAG = "Einstrasse@@@";
     private final static int REQUEST_CODE_ALARM_CREATE = 1;
 
+    private OcResource.OnPutListener onPutListener = null;
+
     //UI Components
     private Button btn_get_data = null;
     private RecyclerView alarm_recycler_view = null;
@@ -71,8 +74,9 @@ public class AlarmFragment extends Fragment implements
 
     // Resource Data
     static private Map<OcResourceIdentifier, OcResource> mFoundResources = new HashMap<>();
-    static private OcResource mFoundWeeklyAlarmHandler = null;
-    static private WeeklyAlarmHandler mWeeklyAlarmHandler = null;
+    // TODO: singletone으로 변경
+//    static private OcResource mFoundWeeklyAlarmHandler = null;
+//    static private WeeklyAlarmHandler mWeeklyAlarmHandler = null;
 
 //    private static enum TaskState {
 //        IDLE, PROCESSING, DONE
@@ -161,7 +165,8 @@ public class AlarmFragment extends Fragment implements
         }
 
         if (resourceUri.equals("/eine/alarm/weekly")) {
-            mFoundWeeklyAlarmHandler = ocResource;
+//            mFoundWeeklyAlarmHandler = ocResource;
+            IoTivity.setWeeklyAlarmHandlerResource(ocResource);
             getWeeklyAlarmHandlerResourceRepresentation();
 //            mFoundLightResource = ocResource;
 //            getLightResourceRepresentation();
@@ -179,7 +184,8 @@ public class AlarmFragment extends Fragment implements
         lg("Request GET method for Weekly Alarm Handler Resource");
         Map<String, String> queryParams = new HashMap<>();
         try {
-            mFoundWeeklyAlarmHandler.get(queryParams, this);
+//            mFoundWeeklyAlarmHandler.get(queryParams, this);
+            IoTivity.getWeeklyAlarmHandlerResource().get(queryParams, this);
         } catch (OcException e) {
             Log.e(TAG, e.toString());
             lg("Error occured while invoking GET Method for weekly alarm Resource");
@@ -191,7 +197,7 @@ public class AlarmFragment extends Fragment implements
     public synchronized void onFindResourceFailed(Throwable throwable, String uri) {
         Log.e(ETAG, "resource found Failed T.T!!");
         Log.e(ETAG, "Requested URI: " + uri);
-        showToast("Find Resource Failed", Toast.LENGTH_SHORT);
+//        showToast("Find Resource Failed", Toast.LENGTH_SHORT);
     }
 
     @Override
@@ -206,7 +212,8 @@ public class AlarmFragment extends Fragment implements
         //TODO: 이 디버그용 코드를 삭제하고 WeeklyAlarmHandler Class만들어서 거기로 빼버리기
         try {
 //            lg((String)ocRepresentation.getValue("name"));
-            mWeeklyAlarmHandler.setOcRepresentation(ocRepresentation);
+//            mWeeklyAlarmHandler.setOcRepresentation(ocRepresentation);
+            IoTivity.getWeeklyAlarmHandler().setOcRepresentation(ocRepresentation);
 //            String serializedData = ocRepresentation.getValue("serializedData");
 //            int alarmCount = ocRepresentation.getValue("alarmCount");
 //            lg("Serialized Data:" + serializedData);
@@ -215,7 +222,8 @@ public class AlarmFragment extends Fragment implements
             lg(e.toString());
         }
 
-        adapter.setData(mWeeklyAlarmHandler.getWeeklyAlarmList());
+//        adapter.setData(mWeeklyAlarmHandler.getWeeklyAlarmList());
+        adapter.setData(IoTivity.getWeeklyAlarmHandler().getWeeklyAlarmList());
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -233,9 +241,25 @@ public class AlarmFragment extends Fragment implements
     public void onCreate(Bundle savedInstanceState) {
         lg("## AlarmFragment onCreate");
         super.onCreate(savedInstanceState);
-        if (null == mWeeklyAlarmHandler) {
-            mWeeklyAlarmHandler = new WeeklyAlarmHandler();
+        if (IoTivity.getWeeklyAlarmHandler() == null) {
+            IoTivity.setWeeklyAlarmHandler(new WeeklyAlarmHandler());
         }
+        if (onPutListener == null) {
+            onPutListener = new OcResource.OnPutListener() {
+                @Override
+                public void onPutCompleted(List<OcHeaderOption> list, OcRepresentation ocRepresentation) {
+                    updateWeeklyAlarmList(ocRepresentation);
+                }
+
+                @Override
+                public void onPutFailed(Throwable throwable) {
+                    lg("Put Method failed T.T");
+                }
+            };
+        }
+//        if (null == mWeeklyAlarmHandler) {
+//            mWeeklyAlarmHandler = new WeeklyAlarmHandler();
+//        }
 
     }
 
@@ -265,7 +289,7 @@ public class AlarmFragment extends Fragment implements
             }
         });
         alarm_recycler_view.setLayoutManager(layout_manager);
-        adapter = new AlarmListAdapter();
+        adapter = new AlarmListAdapter(onPutListener);
         alarm_recycler_view.setAdapter(adapter);
         IoTivityInit();
         findAlarmResource();
@@ -290,7 +314,8 @@ public class AlarmFragment extends Fragment implements
                 queryParams.put("day", String.valueOf(day));
                 OcRepresentation rep = null;
                 try {
-                    rep = mWeeklyAlarmHandler.getOcRepresentation();
+                    rep = IoTivity.getWeeklyAlarmHandler().getOcRepresentation();
+//                    rep = mWeeklyAlarmHandler.getOcRepresentation();
                 } catch (OcException e) {
                     Log.e(TAG, e.toString());
                     lg("Error occured while getOcRepresentation of weekly alarm handler");
@@ -298,7 +323,8 @@ public class AlarmFragment extends Fragment implements
                 }
 
                 try {
-                    mFoundWeeklyAlarmHandler.post(rep, queryParams, new OcResource.OnPostListener() {
+//                    mFoundWeeklyAlarmHandler.post(rep, queryParams, new OcResource.OnPostListener() {
+                    IoTivity.getWeeklyAlarmHandlerResource().post(rep, queryParams, new OcResource.OnPostListener() {
                         @Override
                         public void onPostCompleted(List<OcHeaderOption> list, OcRepresentation ocRepresentation) {
                             lg("Post success!");
