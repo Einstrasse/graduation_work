@@ -442,9 +442,9 @@ public:
 		}
 		char sql[512];
 		string name = "Alarm";
-		string hour = 0;
-		string min = 0;
-		string day = 0;
+		string hour = "";
+		string min = "";
+		string day = "";
 
 		if (qry.find("name") == qry.end()) {
 			name = "Alarm";
