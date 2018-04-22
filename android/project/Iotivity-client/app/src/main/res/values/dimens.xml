@@ -7,4 +7,10 @@
     <dimen name="short_day_font_size">20sp</dimen>
     <dimen name="short_day_height">23sp</dimen>
     <dimen name="short_day_width">20sp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="view_default_margin">20sp</dimen>
+    <dimen name="setting_item_index_font_size">25sp</dimen>
+    <dimen name="setting_item_padding">10sp</dimen>
+    <dimen name="alarm_time_index_font_size">35sp</dimen>
+
 </resources>

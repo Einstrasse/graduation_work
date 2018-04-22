@@ -2,6 +2,7 @@ package edu.skku.einstrasse.iotivity_client.fragment;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -33,9 +34,12 @@ import java.util.List;
 import java.util.Map;
 
 import edu.skku.einstrasse.iotivity_client.R;
+import edu.skku.einstrasse.iotivity_client.activity.WeeklyAlarmAddActivity;
 import edu.skku.einstrasse.iotivity_client.adapter.AlarmListAdapter;
 import edu.skku.einstrasse.iotivity_client.oic.res.AlarmJSONData;
 import edu.skku.einstrasse.iotivity_client.oic.res.WeeklyAlarmHandler;
+
+import static android.app.Activity.RESULT_OK;
 
 
 /**
@@ -53,6 +57,7 @@ public class AlarmFragment extends Fragment implements
     // Constant
     private final static String TAG = HomeFragment.class.getSimpleName();
     private final static String ETAG = "Einstrasse@@@";
+    private final static int REQUEST_CODE_ALARM_CREATE = 1;
 
     //UI Components
     private Button btn_get_data = null;
@@ -177,9 +182,10 @@ public class AlarmFragment extends Fragment implements
             mFoundWeeklyAlarmHandler.get(queryParams, this);
         } catch (OcException e) {
             Log.e(TAG, e.toString());
-            lg("Error occured while invoking GET Method for Light Resource");
+            lg("Error occured while invoking GET Method for weekly alarm Resource");
         }
     }
+
 
     @Override
     public synchronized void onFindResourceFailed(Throwable throwable, String uri) {
@@ -192,16 +198,19 @@ public class AlarmFragment extends Fragment implements
     public synchronized void onGetCompleted(List<OcHeaderOption> list, OcRepresentation ocRepresentation) {
         lg("GET Request successfully finished");
         lg("Resource URI: " + ocRepresentation.getUri());
+        updateWeeklyAlarmList(ocRepresentation);
 
+    }
+
+    private void updateWeeklyAlarmList(OcRepresentation ocRepresentation) {
         //TODO: 이 디버그용 코드를 삭제하고 WeeklyAlarmHandler Class만들어서 거기로 빼버리기
         try {
-
-            lg((String)ocRepresentation.getValue("name"));
+//            lg((String)ocRepresentation.getValue("name"));
             mWeeklyAlarmHandler.setOcRepresentation(ocRepresentation);
-            String serializedData = ocRepresentation.getValue("serializedData");
-            int alarmCount = ocRepresentation.getValue("alarmCount");
-            lg("Serialized Data:" + serializedData);
-            lg("alarmCount:" + alarmCount);
+//            String serializedData = ocRepresentation.getValue("serializedData");
+//            int alarmCount = ocRepresentation.getValue("alarmCount");
+//            lg("Serialized Data:" + serializedData);
+//            lg("alarmCount:" + alarmCount);
         } catch (OcException e) {
             lg(e.toString());
         }
@@ -213,10 +222,8 @@ public class AlarmFragment extends Fragment implements
                 adapter.notifyDataSetChanged();
             }
         });
-
-//        adapter = new AlarmListAdapter(mWeeklyAlarmHandler.getWeeklyAlarmList());
-//        alarm_recycler_view.setAdapter(adapter);
     }
+
     @Override
     public synchronized void onGetFailed(Throwable throwable) {
         lg("Get request Failed T.T");
@@ -242,6 +249,21 @@ public class AlarmFragment extends Fragment implements
         alarm_recycler_view = (RecyclerView) inflated.findViewById(R.id.alarm_recycler_view);
         fab_add_alarm = (FloatingActionButton) inflated.findViewById(R.id.fab_add_alarm);
         layout_manager = new LinearLayoutManager(getActivity());
+
+        fab_add_alarm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Activity activity = getActivity();
+                if (null == getActivity()) {
+                    lg("Cannot load activity!");
+                    return;
+                }
+                Intent intent = new Intent(activity, WeeklyAlarmAddActivity.class);
+//                startActivity(intent);
+                startActivityForResult(intent, REQUEST_CODE_ALARM_CREATE);
+
+            }
+        });
         alarm_recycler_view.setLayoutManager(layout_manager);
         adapter = new AlarmListAdapter();
         alarm_recycler_view.setAdapter(adapter);
@@ -249,6 +271,52 @@ public class AlarmFragment extends Fragment implements
         findAlarmResource();
 
         return inflated;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE_ALARM_CREATE) {
+            if (resultCode == RESULT_OK) {
+                lg("result OKOKOKKOKOK");
+                String alarm_name = data.getStringExtra("name");
+                int hour = data.getIntExtra("hour", 0);
+                int min = data.getIntExtra("min", 0);
+                int day = data.getIntExtra("day", 0);
+                Map<String, String> queryParams = new HashMap<>();
+
+                queryParams.put("name", alarm_name);
+                queryParams.put("hour", String.valueOf(hour));
+                queryParams.put("min", String.valueOf(min));
+                queryParams.put("day", String.valueOf(day));
+                OcRepresentation rep = null;
+                try {
+                    rep = mWeeklyAlarmHandler.getOcRepresentation();
+                } catch (OcException e) {
+                    Log.e(TAG, e.toString());
+                    lg("Error occured while getOcRepresentation of weekly alarm handler");
+                    return;
+                }
+
+                try {
+                    mFoundWeeklyAlarmHandler.post(rep, queryParams, new OcResource.OnPostListener() {
+                        @Override
+                        public void onPostCompleted(List<OcHeaderOption> list, OcRepresentation ocRepresentation) {
+                            lg("Post success!");
+                            updateWeeklyAlarmList(ocRepresentation);
+                        }
+
+                        @Override
+                        public void onPostFailed(Throwable throwable) {
+                            lg("Post failed T.T");
+                        }
+                    });
+                } catch (OcException e) {
+                    Log.e(TAG, e.toString());
+                    lg("Error occured while invoking GET Method for Light Resource");
+                    return;
+                }
+            }
+        }
     }
 
 
