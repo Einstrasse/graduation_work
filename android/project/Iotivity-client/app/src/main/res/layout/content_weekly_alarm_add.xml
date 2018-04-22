@@ -18,6 +18,7 @@
         android:layout_height="wrap_content"
         android:text="@string/alarm_name"
         android:textSize="@dimen/setting_item_index_font_size"
+        android:maxLength="13"
         />
     <EditText
         android:id="@+id/alarm_name_text"
@@ -144,6 +145,13 @@
         android:background="#a6a5a5"
         android:paddingBottom="@dimen/setting_item_padding"
         />
+    <Button
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="@string/cancel"
+        android:id="@+id/cancel_button"
+        />
+
 
 
 
