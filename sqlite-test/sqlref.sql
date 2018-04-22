@@ -34,6 +34,27 @@ VALUES("THU, FRI Lecture", 8, 0, 24),
 ("MON Lecture", 12, 0, 1),
 ("WED Lecture", 11, 0, 4);
 
+# POST Request
+4 params
+- name
+- hour
+- min
+- day
+
+# weekly_alarm update sql query
+UPDATE weekly_alarm
+SET `name`="asdf", `hour`=8
+WHERE `id`=5;
+
+# PUT Request
+6 params
+- name
+- hour
+- min
+- day
+- m_id
+- enabled
+
 # Select Today's weekly alaram
 
 SELECT `hour`, `min` FROM weekly_alarm WHERE enabled=1 AND (day & 1) <> 0;
