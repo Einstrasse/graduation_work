@@ -40,6 +40,7 @@ import edu.skku.einstrasse.iotivity_client.adapter.AlarmListAdapter;
 import edu.skku.einstrasse.iotivity_client.oic.res.AlarmJSONData;
 import edu.skku.einstrasse.iotivity_client.oic.res.WeeklyAlarmHandler;
 
+import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 
 
@@ -59,6 +60,7 @@ public class AlarmFragment extends Fragment implements
     private final static String TAG = HomeFragment.class.getSimpleName();
     private final static String ETAG = "Einstrasse@@@";
     private final static int REQUEST_CODE_ALARM_CREATE = 1;
+    public final static int REQUEST_CODE_ALARM_EDIT = 2;
 
     private OcResource.OnPutListener onPutListener = null;
 
@@ -283,13 +285,12 @@ public class AlarmFragment extends Fragment implements
                     return;
                 }
                 Intent intent = new Intent(activity, WeeklyAlarmAddActivity.class);
-//                startActivity(intent);
                 startActivityForResult(intent, REQUEST_CODE_ALARM_CREATE);
 
             }
         });
         alarm_recycler_view.setLayoutManager(layout_manager);
-        adapter = new AlarmListAdapter(onPutListener);
+        adapter = new AlarmListAdapter(onPutListener, getActivity(), this);
         alarm_recycler_view.setAdapter(adapter);
         IoTivityInit();
         findAlarmResource();
@@ -299,6 +300,7 @@ public class AlarmFragment extends Fragment implements
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        lg("onActivityResult!!");
         if (requestCode == REQUEST_CODE_ALARM_CREATE) {
             if (resultCode == RESULT_OK) {
                 lg("result OKOKOKKOKOK");
@@ -315,7 +317,6 @@ public class AlarmFragment extends Fragment implements
                 OcRepresentation rep = null;
                 try {
                     rep = IoTivity.getWeeklyAlarmHandler().getOcRepresentation();
-//                    rep = mWeeklyAlarmHandler.getOcRepresentation();
                 } catch (OcException e) {
                     Log.e(TAG, e.toString());
                     lg("Error occured while getOcRepresentation of weekly alarm handler");
@@ -323,7 +324,6 @@ public class AlarmFragment extends Fragment implements
                 }
 
                 try {
-//                    mFoundWeeklyAlarmHandler.post(rep, queryParams, new OcResource.OnPostListener() {
                     IoTivity.getWeeklyAlarmHandlerResource().post(rep, queryParams, new OcResource.OnPostListener() {
                         @Override
                         public void onPostCompleted(List<OcHeaderOption> list, OcRepresentation ocRepresentation) {
@@ -341,6 +341,14 @@ public class AlarmFragment extends Fragment implements
                     lg("Error occured while invoking GET Method for Light Resource");
                     return;
                 }
+            }
+        } else if (requestCode == REQUEST_CODE_ALARM_EDIT) {
+            // TODO alarmEdit 받앙와서 사부작사부
+            lg("Result of alarm edit intent");
+            if (resultCode == RESULT_CANCELED) {
+                lg("Canceled....");
+            } else if (resultCode == RESULT_OK) {
+                lg("OKOKOK!!!!!!!!!!!!!");
             }
         }
     }

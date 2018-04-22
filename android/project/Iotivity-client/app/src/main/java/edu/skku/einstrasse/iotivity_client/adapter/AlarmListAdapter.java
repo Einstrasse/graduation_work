@@ -1,7 +1,14 @@
 package edu.skku.einstrasse.iotivity_client.adapter;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Fragment;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.res.Resources;
 import android.support.v4.content.ContextCompat;
+
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,6 +32,9 @@ import java.util.Map;
 
 import edu.skku.einstrasse.iotivity_client.IoTivity;
 import edu.skku.einstrasse.iotivity_client.R;
+import edu.skku.einstrasse.iotivity_client.activity.DashboardActivity;
+import edu.skku.einstrasse.iotivity_client.activity.WeeklyAlarmEditActivity;
+import edu.skku.einstrasse.iotivity_client.fragment.AlarmFragment;
 import edu.skku.einstrasse.iotivity_client.oic.res.AlarmJSONData;
 
 /**
@@ -33,6 +43,8 @@ import edu.skku.einstrasse.iotivity_client.oic.res.AlarmJSONData;
 
 public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.ViewHolder> {
     private List<AlarmJSONData.WeeklyAlarm> mWeeklyDataset = null;
+    private Activity mActivity = null;
+    private Fragment mFragment = null;
     private OcResource.OnPutListener mOnPutListener = null;
     private static final String TAG = "Einstrasse@@ Adapter";
 
@@ -71,9 +83,11 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.View
     public AlarmListAdapter() {
         mWeeklyDataset = new ArrayList<AlarmJSONData.WeeklyAlarm>();
     }
-    public AlarmListAdapter(OcResource.OnPutListener onPutListener) {
+    public AlarmListAdapter(OcResource.OnPutListener onPutListener, Activity activity, Fragment fragment) {
         mWeeklyDataset = new ArrayList<AlarmJSONData.WeeklyAlarm>();
         mOnPutListener = onPutListener;
+        mActivity = activity;
+        mFragment = fragment;
     }
 
     public void setData(List<AlarmJSONData.WeeklyAlarm> data) {
@@ -102,7 +116,35 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.View
         holder.view.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                Toast.makeText(IoTivity.getAppContext(), "Long click!", Toast.LENGTH_SHORT).show();
+                Context context = IoTivity.getAppContext();
+                Resources res = context.getResources();
+                Toast.makeText(context, "Long click!", Toast.LENGTH_SHORT).show();
+                new AlertDialog.Builder(mActivity)
+                        .setTitle(res.getString(R.string.alarm_manipul_title))
+                        .setMessage(res.getString(R.string.alarm_manipul_text))
+                        .setPositiveButton(res.getString(R.string.edit), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                // TODO intent에 alarmEdit에 필요한 정보들을 넘겨주어야 한다.
+                                // TODO 이후 alarmEdit Activity 구현하면됨.
+                                Intent intent = new Intent(IoTivity.getAppContext(), WeeklyAlarmEditActivity.class);
+                                mFragment.startActivityForResult(intent, AlarmFragment.REQUEST_CODE_ALARM_EDIT);
+
+                            }
+                        })
+                        .setNegativeButton(res.getString(R.string.delete), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //TODO delete METHOD는 사용이 제한되어보이므로, POST에서 delete기능도 가능하게 서버단에서구현해야함... T.T
+                            }
+                        })
+                        .setNeutralButton(res.getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //아무 동작도 하지 않는다.
+                            }
+                        })
+                        .show();
                 return true;
             }
         });
