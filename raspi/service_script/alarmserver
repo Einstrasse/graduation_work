@@ -3,11 +3,11 @@
 set -e
 
 BINARY_CWD="/home/pi/Projects/"
-#BINARY_NAME="lightserver"
-BINARY_NAME="run_light_server.sh"
+#BINARY_NAME="alarmserver"
+BINARY_NAME="run_alarm_server.sh"
 BINARY_FULL_PATH=${BINARY_CWD}${BINARY_NAME}
 
-# /etc/init.d/lightserver: start and stop the IoTivity light Control server daemon
+# /etc/init.d/alarmserver: start and stop the IoTivity alarm Control server daemon
 
 test -x ${BINARY_FULL_PATH} || exit 0
 
@@ -30,9 +30,9 @@ check_for_upstart() {
 }
 
 check_privsep_dir() {
-	if [ ! -d /var/run/lightserverd ]; then
-	mkdir /var/run/lightserverd
-	chmod 0755 /var/run/lightserverd
+	if [ ! -d /var/run/alarmserverd ]; then
+	mkdir /var/run/alarmserverd
+	chmod 0755 /var/run/alarmserverd
 	fi
 }
 
@@ -53,8 +53,8 @@ case "$1" in
 #		check_for_upstart 1
 #		check_privsep_dir
 #		check_dev_null
-#		log_daemon_msg "Starting IoTivity Light Server" "lightserverd" || true
-#		if start-stop-daemon --start --quiet --oknodo --pidfile /var/run/lightserverd.pid --exec ${BINARY_FULL_PATH}; then
+#		log_daemon_msg "Starting IoTivity alarm Server" "alarmserverd" || true
+#		if start-stop-daemon --start --quiet --oknodo --pidfile /var/run/alarmserverd.pid --exec ${BINARY_FULL_PATH}; then
 #			log_end_msg 0 || true
 #		else
 #			log_end_msg 1 || true
@@ -63,17 +63,17 @@ case "$1" in
 		;;
 
 	stop)
-		pkill lightserver
+		pkill alarmserver
 #		check_for_upstart 0
-#		log_daemon_msg "Stopping IoTivity Light Server" "lightserverd" || true
-#		if start-stop-daemon --stop --quiet --oknodo --pidfile /var/run/lightserverd.pid; then
+#		log_daemon_msg "Stopping IoTivity alarm Server" "alarmserverd" || true
+#		if start-stop-daemon --stop --quiet --oknodo --pidfile /var/run/alarmserverd.pid; then
 #			log_end_msg 0 || true
 #		else
 #			log_end_msg 1 || true
 #		fi
 		;;
 	*)
-		log_action_msg "Usage: /etc/init.d/lightserver {start|stop|status}" || true
+		log_action_msg "Usage: /etc/init.d/alarmserver {start|stop|status}" || true
 		exit 1
 esac
 
