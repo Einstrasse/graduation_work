@@ -36,6 +36,7 @@ public class AlarmJSONData {
         public String getName() {
             return name;
         }
+        public int getId() { return id; }
         public boolean getEnabled() {
             return enabled;
         }
