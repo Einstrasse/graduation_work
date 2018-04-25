@@ -26,6 +26,7 @@
     <string name="alarm">알람</string>
     <string name="cancel">취소</string>
     <string name="invalid_time">시간이 유효하지 않습니다.</string>
+    <string name="network_unavailable">네트워크 상태가 원활하지 않습니다.</string>
     <string name="alarm_manipul_title">알람 수정/삭제</string>
     <string name="alarm_manipul_text">해당 알람에 대하여 하고싶은 처리를 선택하십시오.</string>
     <string name="edit">수정</string>
@@ -40,6 +41,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_weekly_alarm_add">WeeklyAlarmAddActivity</string>
+    <string name="title_activity_weekly_alarm_edit">WeeklyALarmEditActivity</string>
 
 </resources>
 

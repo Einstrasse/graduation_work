@@ -124,8 +124,13 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.View
         final AlarmJSONData.WeeklyAlarm data = mWeeklyDataset.get(position);
         final int pos = position;
         final int id = data.getId();
+        final String alarmName = data.getName();
+        final int alarmHour = data.getHour();
+        final int alarmMin = data.getMin();
+        final int alarmDay = data.getDay();
+
         holder.alarm_time_text.setText(data.getTimeString());
-        holder.alarm_name_text.setText(data.getName());
+        holder.alarm_name_text.setText(alarmName);
         holder.view.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -141,6 +146,11 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.View
                                 // TODO intent에 alarmEdit에 필요한 정보들을 넘겨주어야 한다.
                                 // TODO 이후 alarmEdit Activity 구현하면됨.
                                 Intent intent = new Intent(IoTivity.getAppContext(), WeeklyAlarmEditActivity.class);
+                                intent.putExtra("alarmName", alarmName);
+                                intent.putExtra("hour", alarmHour);
+                                intent.putExtra("min", alarmMin);
+                                intent.putExtra("day", alarmDay);
+                                intent.putExtra("id", id);
                                 mFragment.startActivityForResult(intent, AlarmFragment.REQUEST_CODE_ALARM_EDIT);
 
                             }

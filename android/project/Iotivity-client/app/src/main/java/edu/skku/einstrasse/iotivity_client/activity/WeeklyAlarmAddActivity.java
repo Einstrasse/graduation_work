@@ -93,7 +93,7 @@ public class WeeklyAlarmAddActivity extends AppCompatActivity {
                     return;
                 }
                 if (null == IoTivity.getWeeklyAlarmHandlerResource()) {
-                    Toast.makeText(IoTivity.getAppContext(), "네트워크 상태가 원활하지 않습니다.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(IoTivity.getAppContext(), getString(R.string.network_unavailable), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 String alarm_name = alarm_name_text.getText().toString();

@@ -350,8 +350,40 @@ public class AlarmFragment extends Fragment implements
             lg("Result of alarm edit intent");
             if (resultCode == RESULT_CANCELED) {
                 lg("Canceled....");
-            } else if (resultCode == RESULT_OK) {
-                lg("OKOKOK!!!!!!!!!!!!!");
+            } else {
+                if (resultCode == RESULT_OK) {
+                    String alarm_name = data.getStringExtra("name");
+                    int hour = data.getIntExtra("hour", 0);
+                    int min = data.getIntExtra("min", 0);
+                    int day = data.getIntExtra("day", 0);
+                    int alarmId = data.getIntExtra("id", -1);
+                    Map<String, String> queryParams = new HashMap<>();
+
+                    queryParams.put("name", alarm_name);
+                    queryParams.put("hour", String.valueOf(hour));
+                    queryParams.put("min", String.valueOf(min));
+                    queryParams.put("day", String.valueOf(day));
+                    queryParams.put("m_id", String.valueOf(alarmId));
+                    OcRepresentation rep = null;
+
+                    try {
+                        rep = IoTivity.getWeeklyAlarmHandler().getOcRepresentation();
+                        IoTivity.getWeeklyAlarmHandlerResource().put(rep, queryParams, new OcResource.OnPutListener() {
+                            @Override
+                            public void onPutCompleted(List<OcHeaderOption> list, OcRepresentation ocRepresentation) {
+                                updateWeeklyAlarmList(ocRepresentation);
+                            }
+
+                            @Override
+                            public void onPutFailed(Throwable throwable) {
+
+                            }
+                        });
+                    } catch (OcException e) {
+                        Toast.makeText(IoTivity.getAppContext(), "Error!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }
             }
         }
     }
