@@ -63,6 +63,7 @@ public class AlarmFragment extends Fragment implements
     public final static int REQUEST_CODE_ALARM_EDIT = 2;
 
     private OcResource.OnPutListener onPutListener = null;
+    private OcResource.OnPostListener onPostListener = null;
 
     //UI Components
     private Button btn_get_data = null;
@@ -71,18 +72,8 @@ public class AlarmFragment extends Fragment implements
     private RecyclerView.LayoutManager layout_manager = null;
     private FloatingActionButton fab_add_alarm = null;
 
-    // Internal data
-//    static private TaskState ConnectionState = TaskState.IDLE;
-
     // Resource Data
     static private Map<OcResourceIdentifier, OcResource> mFoundResources = new HashMap<>();
-    // TODO: singletone으로 변경
-//    static private OcResource mFoundWeeklyAlarmHandler = null;
-//    static private WeeklyAlarmHandler mWeeklyAlarmHandler = null;
-
-//    private static enum TaskState {
-//        IDLE, PROCESSING, DONE
-//    }
 
     public AlarmFragment() {
         // Required empty public constructor
@@ -259,9 +250,20 @@ public class AlarmFragment extends Fragment implements
                 }
             };
         }
-//        if (null == mWeeklyAlarmHandler) {
-//            mWeeklyAlarmHandler = new WeeklyAlarmHandler();
-//        }
+
+        if (onPostListener == null) {
+            onPostListener = new OcResource.OnPostListener() {
+                @Override
+                public void onPostCompleted(List<OcHeaderOption> list, OcRepresentation ocRepresentation) {
+                    updateWeeklyAlarmList(ocRepresentation);
+                }
+
+                @Override
+                public void onPostFailed(Throwable throwable) {
+
+                }
+            };
+        }
 
     }
 
@@ -271,7 +273,6 @@ public class AlarmFragment extends Fragment implements
 
         lg("## AlarmFragment onCreateView");
         View inflated = inflater.inflate(R.layout.fragment_alarm, container, false);
-//        btn_get_data = (Button) inflated.findViewById(R.id.btn_get_data);
         alarm_recycler_view = (RecyclerView) inflated.findViewById(R.id.alarm_recycler_view);
         fab_add_alarm = (FloatingActionButton) inflated.findViewById(R.id.fab_add_alarm);
         layout_manager = new LinearLayoutManager(getActivity());
@@ -290,7 +291,9 @@ public class AlarmFragment extends Fragment implements
             }
         });
         alarm_recycler_view.setLayoutManager(layout_manager);
-        adapter = new AlarmListAdapter(onPutListener, getActivity(), this);
+        adapter = new AlarmListAdapter(getActivity(), this);
+        adapter.setOnPostListener(onPostListener);
+        adapter.setOnPutListener(onPutListener);
         alarm_recycler_view.setAdapter(adapter);
         IoTivityInit();
         findAlarmResource();
