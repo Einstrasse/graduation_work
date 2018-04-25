@@ -321,16 +321,17 @@ private:
                 	if (OC_STACK_OK == OCPlatform::sendResponse(pResponse)) {
                 		ehResult = OC_EH_OK;
                 	}
-                } else if (requestType == "DELETE") {
-                	cout << "\t\t\trequestType : DELETE\n";
-                	OCRepresentation rep = request->getResourceRepresentation();
-
-                	pResponse->setResponseResult(OC_EH_OK);
-                	pResponse->setResourceRepresentation(delete_(queries));
-                	if (OC_STACK_OK == OCPlatform::sendResponse(pResponse)) {
-                		ehResult = OC_EH_OK;
-                	}
                 }
+                //  else if (requestType == "DELETE") {
+                // 	cout << "\t\t\trequestType : DELETE\n";
+                // 	OCRepresentation rep = request->getResourceRepresentation();
+
+                // 	pResponse->setResponseResult(OC_EH_OK);
+                // 	pResponse->setResourceRepresentation(delete_(queries));
+                // 	if (OC_STACK_OK == OCPlatform::sendResponse(pResponse)) {
+                // 		ehResult = OC_EH_OK;
+                // 	}
+                // }
     		}
     	} else {
     		cout << "Invalid Request" << endl;
@@ -444,6 +445,9 @@ public:
 		string hour = "";
 		string min = "";
 		string day = "";
+		if (qry.find("delete") != qry.end()) {
+			return delete_(qry);
+		}
 
 		if (qry.find("name") == qry.end()) {
 			name = "Alarm";
