@@ -11,6 +11,12 @@ import java.util.ArrayList;
 public class AlarmJSONData {
     ArrayList<WeeklyAlarm> weekly;
 
+    static public String leftPad(int val) {
+        if (val < 10) {
+            return "0" + Integer.toString(val);
+        }
+        return Integer.toString(val);
+    }
     public AlarmJSONData() {
         weekly = new ArrayList<WeeklyAlarm>();
     }
@@ -21,21 +27,20 @@ public class AlarmJSONData {
         int min;
         int day;
         boolean enabled;
-        private String leftPad(int val) {
-            if (val < 10) {
-                return "0" + Integer.toString(val);
-            }
-            return Integer.toString(val);
-        }
+
         public String getTimeString() {
             return leftPad(hour) + ":" + leftPad(min);
         }
+
+        public int getHour() { return hour; }
+        public int getMin() { return min; }
         public int getDay() {
             return day;
         }
         public String getName() {
             return name;
         }
+        public int getId() { return id; }
         public boolean getEnabled() {
             return enabled;
         }
