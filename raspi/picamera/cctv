@@ -1,0 +1,80 @@
+#!/bin/bash
+
+set -e
+
+BINARY_CWD="/home/pi/Projects/"
+#BINARY_NAME="cctv"
+BINARY_NAME="run_cctv.sh"
+BINARY_FULL_PATH=${BINARY_CWD}${BINARY_NAME}
+
+# /etc/init.d/cctv: start and stop the cctv Control daemon
+
+test -x ${BINARY_FULL_PATH} || exit 0
+
+echo "Binary exists!";
+echo ${BINARY_FULL_PATH} 
+
+. /lib/lsb/init-functions
+
+PWD=$BINARY_CWD
+
+# Are you running from init?
+run_by_init() {
+	([ "$previous" ] && [ "$runlevel" ]) || [ "$runlevel" = S ]
+}
+
+check_for_upstart() {
+	if init_is_upstart; then
+	exit $1
+	fi
+}
+
+check_privsep_dir() {
+	if [ ! -d /var/run/cctvd ]; then
+	mkdir /var/run/cctvd
+	chmod 0755 /var/run/cctvd
+	fi
+}
+
+check_dev_null() {
+	if [ ! -c /dev/null ]; then
+	if [ "$1" = log_end_msg ]; then
+		log_end_msg 1 || true
+	fi
+	if ! run_by_init; then
+		log_action_msg "/dev/null is not a character device!" || true
+	fi
+	exit 1
+	fi
+}
+
+case "$1" in
+	start)
+#		check_for_upstart 1
+#		check_privsep_dir
+#		check_dev_null
+#		log_daemon_msg "Starting cctv " "cctvd" || true
+#		if start-stop-daemon --start --quiet --oknodo --pidfile /var/run/cctvd.pid --exec ${BINARY_FULL_PATH}; then
+#			log_end_msg 0 || true
+#		else
+#			log_end_msg 1 || true
+#		fi
+		${BINARY_FULL_PATH}
+		;;
+
+	stop)
+		/bin/kill -s 2 `/usr/bin/pgrep mjpg_streamer`
+#		check_for_upstart 0
+#		log_daemon_msg "Stopping cctv " "cctvd" || true
+#		if start-stop-daemon --stop --quiet --oknodo --pidfile /var/run/cctvd.pid; then
+#			log_end_msg 0 || true
+#		else
+#			log_end_msg 1 || true
+#		fi
+		;;
+	*)
+		log_action_msg "Usage: /etc/init.d/cctv {start|stop|status}" || true
+		exit 1
+esac
+
+exit 0

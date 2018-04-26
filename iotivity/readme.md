@@ -17,7 +17,7 @@ no param
 - day
 
 #### PUT
-설정된 알람의 설정 값을 변경한다.    
+설정된 알람의 설정 값을 변경하거나 삭제한다.  
 6 params
 - name
 - hour
@@ -25,8 +25,6 @@ no param
 - day
 - m_id
 - enabled
+- delete
 
-#### DELETE
-알람을 삭제한다    
-1 param
-- m_id
+delete 파라메터가 활성화 되어 있으면 m_id에 해당하는 알람을 삭제한다.

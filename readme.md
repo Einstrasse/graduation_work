@@ -662,7 +662,7 @@ sudo make install
 
 ```
 rpi-update # v4l2 드라이버가 사용가능한 버전으로 업데이트한다
-modrpobe bcm2835-v4l2 # /dev/video0를 로드하고 생성하기 위한 명령어
+modprobe bcm2835-v4l2 # /dev/video0를 로드하고 생성하기 위한 명령어
 ```
 
 [ffmpeg으로 picamera 사용하기](https://gist.github.com/moritzmhmk/48e5ed9c4baa5557422f16983900ca95)    
