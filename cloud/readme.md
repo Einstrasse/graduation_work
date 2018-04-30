@@ -11,6 +11,7 @@ apt install -y maven
 ```
 
 MongoDB 설치
+Resource Directory는 Thin-Client의 리소스 정보를 MongoDB로 저장하므로, MongoDB가 필요하다.
 Ubuntu 16.04에 Community Edition을 설치하는 것을 가정한다.
 [MongoDB 설치 Docs](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/)    
 
@@ -26,4 +27,13 @@ echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongod
 sudo apt-get update
 sudo apt-get install -y mongodb-org
 
+```
+
+MongoDB가 사용하는 db 디렉토리를 만들어준다.
+```
+mkdir -p /data/db
+```
+이후 서비스에서 몽고 데몬을 확인해볼 수 있다.
+```
+service mongod status
 ```
