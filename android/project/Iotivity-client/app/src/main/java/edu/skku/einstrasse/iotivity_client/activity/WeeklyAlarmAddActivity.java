@@ -92,6 +92,10 @@ public class WeeklyAlarmAddActivity extends AppCompatActivity {
                     Toast.makeText(IoTivity.getAppContext(), getString(R.string.invalid_time), Toast.LENGTH_SHORT).show();
                     return;
                 }
+                if (null == IoTivity.getWeeklyAlarmHandlerResource()) {
+                    Toast.makeText(IoTivity.getAppContext(), getString(R.string.network_unavailable), Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 String alarm_name = alarm_name_text.getText().toString();
                 if (alarm_name.length() <= 0) {
                     alarm_name = getString(R.string.alarm);

@@ -41,7 +41,11 @@
             android:name=".activity.WeeklyAlarmAddActivity"
             android:label="@string/title_activity_weekly_alarm_add"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".activity.WeeklyAlarmEditActivity"></activity>
+        <activity
+            android:name=".activity.WeeklyAlarmEditActivity"
+            android:label="@string/title_activity_weekly_alarm_edit"
+            android:theme="@style/AppTheme.NoActionBar"
+            />
     </application>
 
 </manifest>

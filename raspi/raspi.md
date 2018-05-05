@@ -66,6 +66,10 @@ lightserver를 포함한 IoTivity 서버들을 적절히 제어하기 위해서 
 그리고 `/home/pi/Projects/run_light_server.sh` 에 lightserver를 실행시키는 스크립트를 작성한다.
 이제 lightserver는 부팅 시 자동으로 실행되게 된다.
 
+alarmserver의 경우 다음 `/home/pi/Projects/run_alarm_server.sh`의 쉘 스크립트를 실행함으로써 서버를 실행시킨다. 해당 스크립트는 위 service_script 디렉토리에 첨부되어 있다.
+
+부팅시 동작하는 본 쉘 스크립트인 `/etc/rc.local` 스크립트에는 위 `run_*_server.sh` 스크립트들을 실행하도록 한다.
+
 ## 3. Sqlite 연동
 sqlite는 경량화된 DBMS이다. IoT나 임베디드 장비 등을 위한 경량화된 로컬 스토리지 DBMS 역할을 수행한다. 원격에서 접속이 불가능하며, 파일 기반으로 데이터베이스를 저장한다. 알람 기능을 위해서 알람관련 데이터를 저장하기 위해서 sqlite를 사용한다. 다음 명령어를 통해 설치할 수 있다.
 
@@ -100,3 +104,21 @@ ln -s /usr/share/zoneinfo/Asia/Seoul /etc/localtime
 timedatectl status
 ```
 여기서 NTP Synchronized, NTP enabled와 같은 설정으로 확인할 수 있다. 지금 현재상태는 Enabled된 상태이므로 따로 체크할 일은 없다.
+
+## 6. mjpg-streamer 설치
+파이카메라를 이용한 CCTV기능은 다양하게 구현이 가능한데, 이번 경우에는 간편한 웹 스트리밍이 가능한 mjpg-streamer라는 오픈소스를 활용하기로 하였다.    
+[mjpg-stream 깃허브 미러페이지](https://github.com/jacksonliam/mjpg-streamer)    
+
+설치하는 과정을 따라서 차근차근 설치해보자.
+
+```
+cd /home/pi/Desktop/mjpg-streamer/mjpg-streamer-experimental
+export LD_LIBRARY_PATH=`pwd`
+./mjpg_streamer -i "./input_uvc.so -n -f 15 -r 640x480 -l off" -o "./output_http.so -n -p 8083 -w ./www"
+```
+
+파이카메라를 설치한 뒤 위 커맨드를 실행하면 다음 URL에서 라이브 CCTV를 확인할 수 있다.
+```
+http://192.168.35.135:8083/stream.html
+http://192.168.35.135:8083/?action=stream
+```

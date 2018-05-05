@@ -46,6 +46,7 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.View
     private Activity mActivity = null;
     private Fragment mFragment = null;
     private OcResource.OnPutListener mOnPutListener = null;
+    private OcResource.OnPostListener mOnPostListener = null;
     private static final String TAG = "Einstrasse@@ Adapter";
 
     private static void lg(final String msg) {
@@ -89,6 +90,19 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.View
         mActivity = activity;
         mFragment = fragment;
     }
+    public AlarmListAdapter(Activity activity, Fragment fragment) {
+        mWeeklyDataset = new ArrayList<AlarmJSONData.WeeklyAlarm>();
+        mActivity = activity;
+        mFragment = fragment;
+    }
+
+    public void setOnPutListener(OcResource.OnPutListener listener) {
+        mOnPutListener = listener;
+    }
+
+    public void setOnPostListener(OcResource.OnPostListener listener) {
+        mOnPostListener = listener;
+    }
 
     public void setData(List<AlarmJSONData.WeeklyAlarm> data) {
         this.mWeeklyDataset = data;
@@ -110,9 +124,13 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.View
         final AlarmJSONData.WeeklyAlarm data = mWeeklyDataset.get(position);
         final int pos = position;
         final int id = data.getId();
-        holder.alarm_time_text.setText(data.getTimeString());
-        holder.alarm_name_text.setText(data.getName());
+        final String alarmName = data.getName();
+        final int alarmHour = data.getHour();
+        final int alarmMin = data.getMin();
+        final int alarmDay = data.getDay();
 
+        holder.alarm_time_text.setText(data.getTimeString());
+        holder.alarm_name_text.setText(alarmName);
         holder.view.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -128,6 +146,11 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.View
                                 // TODO intent에 alarmEdit에 필요한 정보들을 넘겨주어야 한다.
                                 // TODO 이후 alarmEdit Activity 구현하면됨.
                                 Intent intent = new Intent(IoTivity.getAppContext(), WeeklyAlarmEditActivity.class);
+                                intent.putExtra("alarmName", alarmName);
+                                intent.putExtra("hour", alarmHour);
+                                intent.putExtra("min", alarmMin);
+                                intent.putExtra("day", alarmDay);
+                                intent.putExtra("id", id);
                                 mFragment.startActivityForResult(intent, AlarmFragment.REQUEST_CODE_ALARM_EDIT);
 
                             }
@@ -135,7 +158,17 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.View
                         .setNegativeButton(res.getString(R.string.delete), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                //TODO delete METHOD는 사용이 제한되어보이므로, POST에서 delete기능도 가능하게 서버단에서구현해야함... T.T
+                                OcRepresentation rep = null;
+                                Map<String, String> queryParams = new HashMap<>();
+                                queryParams.put("delete", "true");
+                                queryParams.put("m_id", String.valueOf(id));
+                                Toast.makeText(IoTivity.getAppContext(), "id is " + String.valueOf(id), Toast.LENGTH_SHORT).show();
+                                try {
+                                    rep = IoTivity.getWeeklyAlarmHandler().getOcRepresentation();
+                                    IoTivity.getWeeklyAlarmHandlerResource().post(rep, queryParams, mOnPostListener);
+                                } catch (OcException e) {
+                                    return;
+                                }
                             }
                         })
                         .setNeutralButton(res.getString(R.string.cancel), new DialogInterface.OnClickListener() {
