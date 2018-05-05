@@ -37,3 +37,71 @@ mkdir -p /data/db
 ```
 service mongod status
 ```
+
+`systemctl`을 이용해서도 확인할 수 있다.    
+[systemctl 관련 웹 문서](https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units)    
+부팅 시 mongod가 시작되도록 하려면 다음과 같이 하면된다.
+```
+systemctl enable mongod.service
+```
+
+서비스 시작/종료/재시작/상태조회 시 다음과 같이 하면된다.
+```
+systemctl start mongod.service
+systemctl stop mongod.service
+systemctl restart mongod.service
+systemctl status mongod.service
+systemctl is-active mongod.service
+systemctl is-enabled mongod.service
+systemctl is-failed mongod.service
+```
+
+## IoTIvity Cloud 예제 실행
+예제부터 시작해보자. [예제 문서](https://wiki.iotivity.org/iotivity_cloud_-_programming_guide)    
+
+의존성 중에서 보면 apache kafka와 zookeeper가 있다. kafka자체가 zookeeper에 의존성을 갖는다. 그러므로 apache zookeeper부터 설치하자
+
+### Apache Zookeeper
+아파치 주키퍼를 설치하자. [다운로드](http://mirror.apache-kr.org/zookeeper/stable/)    
+
+```
+tar xvf zookeeper-3.4.12.tar.gz
+
+cd zookeeper-3.4.12
+bin/zkServer.sh start conf/zoo_sample.cfg
+```
+
+서버 상태 확인 시
+```
+bin/zkServer.sh status conf/zoo_sample.cfg
+```
+### Apache Kafka
+아파치 카프카를 설치하자 [다운로드](http://mirror.apache-kr.org/kafka/1.1.0/kafka_2.11-1.1.0.tgz)    
+
+```
+tar xvf kafka_2.11-1.1.0.tgz
+```
+kafka 서버 실행 시
+```
+bin/zookeeper-server-start.sh config/zookeeper.properties
+```
+
+### IoTivity Cloud Sample
+Account server 실행 시 조심해야 할 부분이, target경로에서 실행하면 properties/config.properties를 찾지 못하므로 다음 경로에서 실행한다.
+
+```
+cd /home/bobgil/Desktop/graduation_work/iotivity/cloud/account/
+java -jar target/CloudAccount-0.0.1-SNAPSHOT.jar 5685 127.0.0.1 27017 0
+```
+
+그리고 log4j 설정이 제대로 되지 않아서 다음과 같은 워닝이 발생하므로 주의한다.
+```
+WARN No appenders could be found for logger (org.iotivity.cloud.util.Log).
+log4j:WARN Please initialize the log4j system properly.
+log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html#noconfig for more info.
+
+```
+
+
+
+uid는 user_id로 추정된다. 같은 값을 갖는다.
