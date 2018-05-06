@@ -30,7 +30,7 @@ string         g_accesstoken;
 string              g_host;
 OC::OCResource::Ptr g_binaryswitchResource = nullptr;
 
-OC::OCResource::Ptr g_firmwareResource = nullptr;
+// OC::OCResource::Ptr g_firmwareResource = nullptr;
 
 void printRepresentation(OCRepresentation rep)
 {
@@ -169,28 +169,28 @@ void turnOnOffSwitch(bool toTurn)
     }
 
     OCRepresentation binarySwitch;
-    binarySwitch.setValue("value", toTurn);
+    binarySwitch.setValue("switch", toTurn);
 
     QueryParamsMap      query;
     g_binaryswitchResource->post("oic.r.switch.binary", DEFAULT_INTERFACE, binarySwitch, query,
                                  &onPost);
 }
 
-void updateFirmware()
-{
-    if (g_firmwareResource == nullptr)
-    {
-        cout << "Firmware update not found" << endl;
-        return;
-    }
+// void updateFirmware()
+// {
+//     if (g_firmwareResource == nullptr)
+//     {
+//         cout << "Firmware update not found" << endl;
+//         return;
+//     }
 
-    OCRepresentation firmwareUpdate;
-    firmwareUpdate.setValue<bool>("update", true);
+//     OCRepresentation firmwareUpdate;
+//     firmwareUpdate.setValue<bool>("update", true);
 
-    QueryParamsMap      query;
-    g_binaryswitchResource->post("x.org.iotivity.firmware", DEFAULT_INTERFACE, firmwareUpdate, query,
-                                 &onPost);
-}
+//     QueryParamsMap      query;
+//     g_binaryswitchResource->post("x.org.iotivity.firmware", DEFAULT_INTERFACE, firmwareUpdate, query,
+//                                  &onPost);
+// }
 
 void getCollectionResource(const HeaderOptions &,
                            const OCRepresentation &rep, const int ecode)
@@ -219,25 +219,25 @@ void getCollectionResource(const HeaderOptions &,
             g_binaryswitchResource->observe(ObserveType::Observe, query, &onObserve);
         }
 
-        if (it->getResourceTypes().at(0).compare("x.org.iotivity.firmware") == 0)
-        {
-            cout << "Observing " << it->getUri() << endl;
-            g_firmwareResource = OCPlatform::constructResourceObject(g_host,
-                                 it->getUri(),
-                                 static_cast<OCConnectivityType>(CT_ADAPTER_TCP | CT_IP_USE_V4), true,
-            { string("x.org.iotivity.firmware") }, { string(DEFAULT_INTERFACE) });
+        // if (it->getResourceTypes().at(0).compare("x.org.iotivity.firmware") == 0)
+        // {
+        //     cout << "Observing " << it->getUri() << endl;
+        //     g_firmwareResource = OCPlatform::constructResourceObject(g_host,
+        //                          it->getUri(),
+        //                          static_cast<OCConnectivityType>(CT_ADAPTER_TCP | CT_IP_USE_V4), true,
+        //     { string("x.org.iotivity.firmware") }, { string(DEFAULT_INTERFACE) });
 
-            QueryParamsMap      query;
-            g_firmwareResource->observe(ObserveType::Observe, query, &onObserve);
-        }
+        //     QueryParamsMap      query;
+        //     g_firmwareResource->observe(ObserveType::Observe, query, &onObserve);
+        // }
     }
 }
 
-void foundAirconditionerResource(shared_ptr<OC::OCResource> resource)
+void foundLightResource(shared_ptr<OC::OCResource> resource)
 {
     vector<string> rt = resource->getResourceTypes();
 
-    cout << "Aircondition resource found: " << resource->uri() << endl;
+    cout << "Light resource found: " << resource->uri() << endl;
 
     g_callbackLock.notify_all();
 
@@ -245,9 +245,9 @@ void foundAirconditionerResource(shared_ptr<OC::OCResource> resource)
     {
         cout << "RT: " << *it << endl;
 
-        if (it->compare("x.org.iotivity.ac") == 0)
+        if (it->compare("x.org.iotivity.lt") == 0)
         {
-            cout << "Found Airconditioner" << endl;
+            cout << "Found Light" << endl;
 
             QueryParamsMap      query;
             query["if"] = string(LINK_INTERFACE);
@@ -272,14 +272,14 @@ void foundDevice(shared_ptr<OC::OCResource> resource)
     {
         cout << "RT: " << *it << endl;
 
-        if (it->compare("oic.d.airconditioner") == 0)
+        if (it->compare("oic.d.light") == 0)
         {
             string searchQuery = "/oic/res?di=";
             searchQuery += resource->sid();
-            cout << "Airconditioner found" << endl;
+            cout << "Light found" << endl;
             OCPlatform::findResource(g_host, searchQuery,
                                      static_cast<OCConnectivityType>(CT_ADAPTER_TCP | CT_IP_USE_V4),
-                                     &foundAirconditionerResource);
+                                     &foundLightResource);
 
             OCPlatform::OCPresenceHandle    handle;
             if (OCPlatform::subscribeDevicePresence(handle, g_host, { resource->sid() },
@@ -355,7 +355,7 @@ static FILE *client_open(const char *path, const char *mode)
 {
     if (0 == strcmp(path, OC_SECURITY_DB_DAT_FILE_NAME))
     {
-        return fopen("./aircon_controller.dat", mode);
+        return fopen("./remote_client.dat", mode);
     }
     else
     {
@@ -475,9 +475,9 @@ int main(int argc, char *argv[])
                 turnOnOffSwitch(false);
                 break;
 
-            case 'f':
-                updateFirmware();
-                break;
+            // case 'f':
+            //     updateFirmware();
+            //     break;
 
             case 'q':
                 goto exit;

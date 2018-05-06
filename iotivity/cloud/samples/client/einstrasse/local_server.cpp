@@ -127,69 +127,121 @@ class Resource
     
 };
 
-class LightResource : public Resource //core.light
+class LightResource : public Resource // oic.d.airconditioner
+{
+    private:
+
+    public:
+        LightResource(string uri, vector<string> rt, vector<string> itf)
+            : Resource(uri, rt, itf)
+        {
+
+        }
+
+        OCEntityHandlerResult entityHandler(shared_ptr<OCResourceRequest> request)
+        {
+            cout << "\tIn Server Airconditioner entity handler:\n";
+            OCEntityHandlerResult ehResult = OC_EH_ERROR;
+
+            if (request)
+            {
+                // Get the request type and request flag
+                string requestType = request->getRequestType();
+                int requestFlag = request->getRequestHandlerFlag();
+
+                if (requestFlag & RequestHandlerFlag::RequestFlag)
+                {
+                    cout << "\t\trequestFlag : Request\n";
+
+                    // If the request type is GET
+                    if (requestType == "GET")
+                    {
+                        cout << "\t\t\trequestType : GET\n";
+                        string findRes = request->getQueryParameters().find("if")->second;
+                        if (findRes.compare(LINK_INTERFACE) == 0)
+                        {
+                            if (OC_STACK_OK == sendRepresentation(request))
+                            {
+                                ehResult = OC_EH_OK;
+                            }
+                        }
+                        else
+                        {
+                            ehResult = OC_EH_FORBIDDEN;
+                        }
+                    }
+                    else if (requestType == "PUT")
+                    {
+                        cout << "\t\t\trequestType : PUT\n";
+                        // Call these functions to prepare the response for child resources and
+                        // then send the final response using sendRoomResponse function
+
+                        /*
+                        for (auto it = m_childResources.begin();
+                             it != m_childResources.end(); it++)
+                        {
+                            (*it)->entityHandler(request);
+                        }
+
+                        if (OC_STACK_OK == sendRepresentation(request))
+                        {
+                            ehResult = OC_EH_OK;
+                        }
+                        */
+                    }
+                    else if (requestType == "POST")
+                    {
+                        // POST request operations
+                    }
+                    else if (requestType == "DELETE")
+                    {
+                        // DELETE request operations
+                    }
+                }
+
+                if (requestFlag & RequestHandlerFlag::ObserverFlag)
+                {
+                    cout << "\t\trequestFlag : Observer\n";
+                }
+            }
+            else
+            {
+                cout << "Request invalid" << endl;
+            }
+
+            return ehResult;
+        }
+};
+
+class BinarySwitchResource : public Resource //oic.r.switch.binary
 {
     private:
         bool m_switch;
-        int m_onAngle;
-        int m_offAngle;
 
     public:
-        LightResource(string uri, vector<string> resType, vector<string> interfaces)
-            : Resource(uri, resType, interfaces) {
+        BinarySwitchResource(string uri, vector<string> rt, vector<string> itf)
+            : Resource(uri, rt, itf)
+        {
             m_switch = false;
-            m_onAngle = 105;
-            m_offAngle = 75;
-            m_representation.setUri(uri);
-            m_representation.setValue("onAngle", m_onAngle);
-            m_representation.setValue("offAngle", m_offAngle);
             m_representation.setValue("switch", m_switch);
         }
 
-        void setLightRepresentation(OCRepresentation &rep) {
+        void setBinarySwitchRepresentation(OCRepresentation &rep)
+        {
             bool _switch;
-            int onAngle, offAngle;
-            if (rep.getValue("switch", _switch)) {
+            if (rep.getValue("switch", _switch))
+            {
                 m_switch = _switch;
                 m_representation.setValue("switch", m_switch);
                 cout << "\t\t\t\t" << "switch: " << m_switch << endl;
 
                 propagate();
             }
-
-            if (rep.getValue("onAngle", onAngle)) {
-                m_onAngle = onAngle;
-                m_representation.setValue("onAngle", m_onAngle);
-                cout << "\t\t\t\t" << "onAngle: " << m_onAngle << endl;
-
-                propagate();
-            }
-
-            if (rep.getValue("offAngle", offAngle)) {
-                m_offAngle = offAngle;
-                m_representation.setValue("offAngle", m_offAngle);
-                cout << "\t\t\t\t" << "offAngle: " << m_offAngle << endl;
-
-                propagate();   
-            }
         }
-
-        // void setBinarySwitchRepresentation(OCRepresentation &rep)
-        // {
-        //     bool value;
-        //     if (rep.getValue("value", value))
-        //     {
-        //         m_value = value;
-        //         m_representation.setValue("value", m_value);
-        //         cout << "\t\t\t\t" << "value: " << m_value << endl;
-
-        //         propagate();
-        //     }
-        // }
 
         OCEntityHandlerResult entityHandler(shared_ptr<OCResourceRequest> request)
         {
-            cout << "\tIn Server Light entity handler:\n";
+            cout << "\tIn Server Binaryswitch entity handler:\n";
             OCEntityHandlerResult ehResult = OC_EH_ERROR;
 
             if (request)
@@ -221,7 +273,7 @@ class LightResource : public Resource //core.light
                         cout << "\t\t\trequestType : POST\n";
                         // POST request operations
                         OCRepresentation    rep = request->getResourceRepresentation();
-                        setLightRepresentation(rep);
+                        setBinarySwitchRepresentation(rep);
 
                         if (OC_STACK_OK == sendRepresentation(request))
                         {
@@ -263,35 +315,57 @@ class LightResource : public Resource //core.light
         }
 };
 
-// class BinarySwitchResource : public Resource //oic.r.switch.binary
+// class LightResource : public Resource //core.light
 // {
 //     private:
-//         bool m_value;
+//         bool m_switch;
+//         int m_onAngle;
+//         int m_offAngle;
 
 //     public:
-//         BinarySwitchResource(string uri, vector<string> rt, vector<string> itf)
-//             : Resource(uri, rt, itf)
-//         {
-//             m_value = false;
-//             m_representation.setValue("value", m_value);
+//         LightResource(string uri, vector<string> resType, vector<string> interfaces)
+//             : Resource(uri, resType, interfaces) {
+//             m_switch = false;
+//             m_onAngle = 105;
+//             m_offAngle = 75;
+//             m_representation.setUri(uri);
+//             m_representation.setValue("onAngle", m_onAngle);
+//             m_representation.setValue("offAngle", m_offAngle);
+//             m_representation.setValue("switch", m_switch);
 //         }
 
-//         void setBinarySwitchRepresentation(OCRepresentation &rep)
-//         {
-//             bool value;
-//             if (rep.getValue("value", value))
-//             {
-//                 m_value = value;
-//                 m_representation.setValue("value", m_value);
-//                 cout << "\t\t\t\t" << "value: " << m_value << endl;
+//         void setLightRepresentation(OCRepresentation &rep) {
+//             bool _switch;
+//             int onAngle, offAngle;
+//             if (rep.getValue("switch", _switch)) {
+//                 m_switch = _switch;
+//                 m_representation.setValue("switch", m_switch);
+//                 cout << "\t\t\t\t" << "switch: " << m_switch << endl;
 
 //                 propagate();
 //             }
+
+//             if (rep.getValue("onAngle", onAngle)) {
+//                 m_onAngle = onAngle;
+//                 m_representation.setValue("onAngle", m_onAngle);
+//                 cout << "\t\t\t\t" << "onAngle: " << m_onAngle << endl;
+
+//                 propagate();
+//             }
+
+//             if (rep.getValue("offAngle", offAngle)) {
+//                 m_offAngle = offAngle;
+//                 m_representation.setValue("offAngle", m_offAngle);
+//                 cout << "\t\t\t\t" << "offAngle: " << m_offAngle << endl;
+
+//                 propagate();   
+//             }
 //         }
+
 
 //         OCEntityHandlerResult entityHandler(shared_ptr<OCResourceRequest> request)
 //         {
-//             cout << "\tIn Server Binaryswitch entity handler:\n";
+//             cout << "\tIn Server Light entity handler:\n";
 //             OCEntityHandlerResult ehResult = OC_EH_ERROR;
 
 //             if (request)
@@ -323,7 +397,7 @@ class LightResource : public Resource //core.light
 //                         cout << "\t\t\trequestType : POST\n";
 //                         // POST request operations
 //                         OCRepresentation    rep = request->getResourceRepresentation();
-//                         setBinarySwitchRepresentation(rep);
+//                         setLightRepresentation(rep);
 
 //                         if (OC_STACK_OK == sendRepresentation(request))
 //                         {
@@ -364,6 +438,8 @@ class LightResource : public Resource //core.light
 //             return ehResult;
 //         }
 // };
+
+
 
 // class TemperatureResource : public Resource //oic.r.temperature
 // {
@@ -899,7 +975,7 @@ static FILE *client_open(const char *path, const char *mode)
 {
     if (0 == strcmp(path, OC_SECURITY_DB_DAT_FILE_NAME))
     {
-        return fopen("./aircon_controlee.dat", mode);
+        return fopen("./local_server.dat", mode);
     }
     else
     {
@@ -919,7 +995,7 @@ OCStackResult SetDeviceInfo()
         return result;
     }
 
-    result = OCBindResourceTypeToResource(handle, "oic.d.airconditioner");
+    result = OCBindResourceTypeToResource(handle, "oic.d.light");
 
     if (result != OC_STACK_OK)
     {
@@ -1019,24 +1095,27 @@ int main(int argc, char *argv[])
 
     cout << "Registering resources to platform..." << endl;
 
-    AirConditionerResource  airConditioner("/aircon/0", { "x.org.iotivity.ac" }, { DEFAULT_INTERFACE, BATCH_INTERFACE, LINK_INTERFACE });
+    LightResource light("/light/0", { "x.org.iotivity.lt" }, { DEFAULT_INTERFACE, BATCH_INTERFACE, LINK_INTERFACE });
 
     BinarySwitchResource    binarySwitch("/power/0", { "oic.r.switch.binary" }, { DEFAULT_INTERFACE });
 
-    TemperatureResource     temperature("/temperature/0", { "oic.r.temperature" }, { DEFAULT_INTERFACE });
+    // AirConditionerResource  airConditioner("/aircon/0", { "x.org.iotivity.ac" }, { DEFAULT_INTERFACE, BATCH_INTERFACE, LINK_INTERFACE });
 
-    FirmwareResource     firmware("/firmware", { "x.org.iotivity.firmware" }, { DEFAULT_INTERFACE });
 
-    string uri = airConditioner.getResourceUri();
-    string rt = airConditioner.getResourceType()[0];
-    string itf = airConditioner.getInterfaces()[0];
+    // TemperatureResource     temperature("/temperature/0", { "oic.r.temperature" }, { DEFAULT_INTERFACE });
 
-    result = OCPlatform::registerResource(airConditioner.m_handle,
+    // FirmwareResource     firmware("/firmware", { "x.org.iotivity.firmware" }, { DEFAULT_INTERFACE });
+
+    string uri = light.getResourceUri();
+    string rt = light.getResourceType()[0];
+    string itf = light.getInterfaces()[0];
+
+    result = OCPlatform::registerResource(light.m_handle,
                                           uri,
                                           rt,
                                           itf,
-                                          bind(&AirConditionerResource::entityHandler
-                                                  , &airConditioner, placeholders::_1),
+                                          bind(&LightResource::entityHandler
+                                                  , &light, placeholders::_1),
                                           OC_DISCOVERABLE);
 
     if (result != OC_STACK_OK)
@@ -1045,23 +1124,21 @@ int main(int argc, char *argv[])
     }
 
 
-    itf = airConditioner.getInterfaces()[1];
-    result = OCPlatform::bindInterfaceToResource(airConditioner.m_handle, itf);
+    itf = light.getInterfaces()[1];
+    result = OCPlatform::bindInterfaceToResource(light.m_handle, itf);
 
     if (result != OC_STACK_OK)
     {
         cout << "Binding second interface was unsuccessful" << endl;
     }
 
-
-    itf = airConditioner.getInterfaces()[2];
-    result = OCPlatform::bindInterfaceToResource(airConditioner.m_handle, itf);
+    itf = light.getInterfaces()[2];
+    result = OCPlatform::bindInterfaceToResource(light.m_handle, itf);
 
     if (result != OC_STACK_OK)
     {
         cout << "Binding third interface was unsuccessful" << endl;
     }
-
 
     uri = binarySwitch.getResourceUri();
     rt = binarySwitch.getResourceType()[0];
@@ -1080,55 +1157,20 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    uri = temperature.getResourceUri();
-    rt = temperature.getResourceType()[0];
-    itf = temperature.getInterfaces()[0];
 
-    result = OCPlatform::registerResource(temperature.m_handle,
-                                          uri,
-                                          rt,
-                                          itf,
-                                          bind(&TemperatureResource::entityHandler
-                                                  , &temperature, placeholders::_1),
-                                          OC_OBSERVABLE);
+    result = light.addChildResource(&binarySwitch);
 
     if (result != OC_STACK_OK)
     {
         exit(EXIT_FAILURE);
     }
 
+    // result = light.addChildResource(&temperature);
 
-    uri = firmware.getResourceUri();
-    rt = firmware.getResourceType()[0];
-    itf = firmware.getInterfaces()[0];
-
-    result = OCPlatform::registerResource(firmware.m_handle,
-                                          uri,
-                                          rt,
-                                          itf,
-                                          bind(&FirmwareResource::entityHandler
-                                                  , &firmware, placeholders::_1),
-                                          OC_OBSERVABLE);
-
-    if (result != OC_STACK_OK)
-    {
-        exit(EXIT_FAILURE);
-    }
-
-
-    result = airConditioner.addChildResource(&binarySwitch);
-
-    if (result != OC_STACK_OK)
-    {
-        exit(EXIT_FAILURE);
-    }
-
-    result = airConditioner.addChildResource(&temperature);
-
-    if (result != OC_STACK_OK)
-    {
-        exit(EXIT_FAILURE);
-    }
+    // if (result != OC_STACK_OK)
+    // {
+    //     exit(EXIT_FAILURE);
+    // }
 
     cout << "Publishing resources to cloud ";
 
@@ -1147,8 +1189,8 @@ int main(int argc, char *argv[])
 
     cout << " result: " << result << " Waiting Publish default resource response from cloud" << endl;
 
-    resourceHandles.push_back(airConditioner.m_handle);
-    resourceHandles.push_back(firmware.m_handle);
+    resourceHandles.push_back(light.m_handle);
+    // resourceHandles.push_back(firmware.m_handle);
 
     result = RDClient::Instance().publishResourceToRD(g_host, OCConnectivityType::CT_ADAPTER_TCP,
              resourceHandles,
@@ -1159,7 +1201,7 @@ int main(int argc, char *argv[])
     g_callbackLock.wait(lock);
 
 
-    cout << "PUT 1/0 to turn on/off air conditioner for observe testing, q to terminate" << endl;
+    cout << "PUT 1/0 to turn on/off light for observe testing, q to terminate" << endl;
 
     string cmd;
 
@@ -1171,12 +1213,12 @@ int main(int argc, char *argv[])
         switch (cmd[0])
         {
             case '1':
-                rep.setValue(string("value"), true);
+                rep.setValue(string("switch"), true);
                 binarySwitch.setBinarySwitchRepresentation(rep);
                 break;
 
             case '0':
-                rep.setValue(string("value"), false);
+                rep.setValue(string("switch"), false);
                 binarySwitch.setBinarySwitchRepresentation(rep);
                 break;
 
