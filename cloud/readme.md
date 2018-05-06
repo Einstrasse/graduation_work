@@ -102,6 +102,10 @@ log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html#noconfig for more in
 
 ```
 
-
+IoTivity Cloud Sample 빌드 시 다음 커맨드로 할 수 있다.
+```
+scons cloud WITH_TCP=yes RELEASE=yes TARGET_TRANSPORT=IP WITH_CLOUD=yes WITH_MQ=PUB,SUB SECURED=0
+```
+SECURED=0는 TLS를 적용하지 않는 다는 뜻이며, 인증서와 같이 보안 설정이 제대로 되지 않았으므로 SECURED=0를 설정 하지 않은채로 실행 시 UNAUTHORIZED 에러가 날 수 있다.
 
 uid는 user_id로 추정된다. 같은 값을 갖는다.
