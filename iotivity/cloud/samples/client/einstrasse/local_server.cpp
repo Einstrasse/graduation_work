@@ -30,6 +30,10 @@ string              g_host;
 
 class Resource
 {
+    protected:
+        OCRepresentation    m_representation;
+        vector<Resource *>  m_childResources;
+        ObservationIds      m_interestedObservers;
     public:
         OCResourceHandle m_handle;
         Resource(string uri, vector<string> rt, vector<string> itf)
@@ -120,41 +124,72 @@ class Resource
 
         virtual OCEntityHandlerResult entityHandler(shared_ptr<OCResourceRequest> request) = 0;
 
-    protected:
-        OCRepresentation    m_representation;
-        vector<Resource *>  m_childResources;
-        ObservationIds      m_interestedObservers;
+    
 };
 
-class BinarySwitchResource : public Resource //oic.r.switch.binary
+class LightResource : public Resource //core.light
 {
     private:
-        bool m_value;
+        bool m_switch;
+        int m_onAngle;
+        int m_offAngle;
 
     public:
-        BinarySwitchResource(string uri, vector<string> rt, vector<string> itf)
-            : Resource(uri, rt, itf)
-        {
-            m_value = false;
-            m_representation.setValue("value", m_value);
+        LightResource(string uri, vector<string> resType, vector<string> interfaces)
+            : Resource(uri, resType, interfaces) {
+            m_switch = false;
+            m_onAngle = 105;
+            m_offAngle = 75;
+            m_representation.setUri(uri);
+            m_representation.setValue("onAngle", m_onAngle);
+            m_representation.setValue("offAngle", m_offAngle);
+            m_representation.setValue("switch", m_switch);
         }
 
-        void setBinarySwitchRepresentation(OCRepresentation &rep)
-        {
-            bool value;
-            if (rep.getValue("value", value))
-            {
-                m_value = value;
-                m_representation.setValue("value", m_value);
-                cout << "\t\t\t\t" << "value: " << m_value << endl;
+        void setLightRepresentation(OCRepresentation &rep) {
+            bool _switch;
+            int onAngle, offAngle;
+            if (rep.getValue("switch", _switch)) {
+                m_switch = _switch;
+                m_representation.setValue("switch", m_switch);
+                cout << "\t\t\t\t" << "switch: " << m_switch << endl;
 
                 propagate();
             }
+
+            if (rep.getValue("onAngle", onAngle)) {
+                m_onAngle = onAngle;
+                m_representation.setValue("onAngle", m_onAngle);
+                cout << "\t\t\t\t" << "onAngle: " << m_onAngle << endl;
+
+                propagate();
+            }
+
+            if (rep.getValue("offAngle", offAngle)) {
+                m_offAngle = offAngle;
+                m_representation.setValue("offAngle", m_offAngle);
+                cout << "\t\t\t\t" << "offAngle: " << m_offAngle << endl;
+
+                propagate();   
+            }
         }
+
+        // void setBinarySwitchRepresentation(OCRepresentation &rep)
+        // {
+        //     bool value;
+        //     if (rep.getValue("value", value))
+        //     {
+        //         m_value = value;
+        //         m_representation.setValue("value", m_value);
+        //         cout << "\t\t\t\t" << "value: " << m_value << endl;
+
+        //         propagate();
+        //     }
+        // }
 
         OCEntityHandlerResult entityHandler(shared_ptr<OCResourceRequest> request)
         {
-            cout << "\tIn Server Binaryswitch entity handler:\n";
+            cout << "\tIn Server Light entity handler:\n";
             OCEntityHandlerResult ehResult = OC_EH_ERROR;
 
             if (request)
@@ -186,7 +221,7 @@ class BinarySwitchResource : public Resource //oic.r.switch.binary
                         cout << "\t\t\trequestType : POST\n";
                         // POST request operations
                         OCRepresentation    rep = request->getResourceRepresentation();
-                        setBinarySwitchRepresentation(rep);
+                        setLightRepresentation(rep);
 
                         if (OC_STACK_OK == sendRepresentation(request))
                         {
@@ -228,414 +263,516 @@ class BinarySwitchResource : public Resource //oic.r.switch.binary
         }
 };
 
-class TemperatureResource : public Resource //oic.r.temperature
-{
-    private:
-        int m_temperature;
-        string m_range;
-        string m_units;
+// class BinarySwitchResource : public Resource //oic.r.switch.binary
+// {
+//     private:
+//         bool m_value;
 
-    public:
-        TemperatureResource(string uri, vector<string> rt, vector<string> itf)
-            : Resource(uri, rt, itf)
-        {
-            m_temperature = 0;
-            m_range = "";
-            m_units = "";
-            m_representation.setValue("temperature", m_temperature);
-            m_representation.setValue("range", m_range);
-            m_representation.setValue("units", m_units);
-        }
+//     public:
+//         BinarySwitchResource(string uri, vector<string> rt, vector<string> itf)
+//             : Resource(uri, rt, itf)
+//         {
+//             m_value = false;
+//             m_representation.setValue("value", m_value);
+//         }
 
-        void setTemperatureRepresentation(OCRepresentation &rep)
-        {
-            int temperature;
-            string range;
-            int units;
+//         void setBinarySwitchRepresentation(OCRepresentation &rep)
+//         {
+//             bool value;
+//             if (rep.getValue("value", value))
+//             {
+//                 m_value = value;
+//                 m_representation.setValue("value", m_value);
+//                 cout << "\t\t\t\t" << "value: " << m_value << endl;
 
-            if (rep.getValue("temperature", temperature) &&
-                rep.getValue("range", range) &&
-                rep.getValue("units", units))
-            {
-                m_temperature = temperature;
-                m_range = range;
-                m_units = units;
-                m_representation.setValue("temperature", m_temperature);
-                m_representation.setValue("range", m_range);
-                m_representation.setValue("units", m_units);
-                cout << "\t\t\t\t" << "temperature: " << m_temperature << endl;
-                cout << "\t\t\t\t" << "range: " << m_range << endl;
-                cout << "\t\t\t\t" << "units: " << m_units << endl;
+//                 propagate();
+//             }
+//         }
 
-                propagate();
-            }
-        }
+//         OCEntityHandlerResult entityHandler(shared_ptr<OCResourceRequest> request)
+//         {
+//             cout << "\tIn Server Binaryswitch entity handler:\n";
+//             OCEntityHandlerResult ehResult = OC_EH_ERROR;
 
-        OCEntityHandlerResult entityHandler(shared_ptr<OCResourceRequest> request)
-        {
-            cout << "\tIn Server Temperature entity handler:\n";
-            OCEntityHandlerResult ehResult = OC_EH_ERROR;
+//             if (request)
+//             {
+//                 // Get the request type and request flag
+//                 string requestType = request->getRequestType();
+//                 int requestFlag = request->getRequestHandlerFlag();
 
-            if (request)
-            {
-                // Get the request type and request flag
-                string requestType = request->getRequestType();
-                int requestFlag = request->getRequestHandlerFlag();
+//                 if (requestFlag & RequestHandlerFlag::RequestFlag)
+//                 {
+//                     cout << "\t\trequestFlag : Request\n";
 
-                if (requestFlag & RequestHandlerFlag::RequestFlag)
-                {
-                    cout << "\t\trequestFlag : Request\n";
+//                     // If the request type is GET
+//                     if (requestType == "GET")
+//                     {
+//                         cout << "\t\t\trequestType : GET\n";
+//                         if (OC_STACK_OK == sendRepresentation(request))
+//                         {
+//                             ehResult = OC_EH_OK;
+//                         }
+//                     }
+//                     else if (requestType == "PUT")
+//                     {
+//                         cout << "\t\t\trequestType : PUT\n";
+//                         // PUT request operations
+//                     }
+//                     else if (requestType == "POST")
+//                     {
+//                         cout << "\t\t\trequestType : POST\n";
+//                         // POST request operations
+//                         OCRepresentation    rep = request->getResourceRepresentation();
+//                         setBinarySwitchRepresentation(rep);
 
-                    // If the request type is GET
-                    if (requestType == "GET")
-                    {
-                        cout << "\t\t\trequestType : GET\n";
-                        if (OC_STACK_OK == sendRepresentation(request))
-                        {
-                            ehResult = OC_EH_OK;
-                        }
-                    }
-                    else if (requestType == "PUT")
-                    {
-                        cout << "\t\t\trequestType : PUT\n";
-                        // PUT requeist operations
-                    }
-                    else if (requestType == "POST")
-                    {
-                        cout << "\t\t\trequestType : POST\n";
-                        // POST request operations
-                        OCRepresentation    rep = request->getResourceRepresentation();
-                        setTemperatureRepresentation(rep);
+//                         if (OC_STACK_OK == sendRepresentation(request))
+//                         {
+//                             ehResult = OC_EH_OK;
+//                         }
+//                     }
+//                     else if (requestType == "DELETE")
+//                     {
+//                         cout << "\t\t\trequestType : DELETE\n";
+//                         // DELETE request operations
+//                     }
+//                 }
 
-                        if (OC_STACK_OK == sendRepresentation(request))
-                        {
-                            ehResult = OC_EH_OK;
-                        }
-                    }
-                    else if (requestType == "DELETE")
-                    {
-                        cout << "\t\t\trequestType : DELETE\n";
-                        // DELETE request operations
-                    }
-                }
+//                 if (requestFlag & RequestHandlerFlag::ObserverFlag)
+//                 {
+//                     cout << "\t\trequestFlag : Observer\n";
 
-                if (requestFlag & RequestHandlerFlag::ObserverFlag)
-                {
-                    cout << "\t\trequestFlag : Observer\n";
+//                     ObservationInfo observationInfo = request->getObservationInfo();
+//                     if (ObserveAction::ObserveRegister == observationInfo.action)
+//                     {
+//                         m_interestedObservers.push_back(observationInfo.obsId);
+//                     }
+//                     else if (ObserveAction::ObserveUnregister == observationInfo.action)
+//                     {
+//                         m_interestedObservers.erase(remove(
+//                                                         m_interestedObservers.begin(),
+//                                                         m_interestedObservers.end(),
+//                                                         observationInfo.obsId),
+//                                                     m_interestedObservers.end());
+//                     }
+//                 }
+//             }
+//             else
+//             {
+//                 cout << "Request invalid" << endl;
+//             }
 
-                    ObservationInfo observationInfo = request->getObservationInfo();
-                    if (ObserveAction::ObserveRegister == observationInfo.action)
-                    {
-                        m_interestedObservers.push_back(observationInfo.obsId);
-                    }
-                    else if (ObserveAction::ObserveUnregister == observationInfo.action)
-                    {
-                        m_interestedObservers.erase(remove(
-                                                        m_interestedObservers.begin(),
-                                                        m_interestedObservers.end(),
-                                                        observationInfo.obsId),
-                                                    m_interestedObservers.end());
-                    }
-                }
-            }
-            else
-            {
-                cout << "Request invalid" << endl;
-            }
+//             return ehResult;
+//         }
+// };
 
-            return ehResult;
-        }
-};
+// class TemperatureResource : public Resource //oic.r.temperature
+// {
+//     private:
+//         int m_temperature;
+//         string m_range;
+//         string m_units;
 
-class AirConditionerResource : public Resource // oic.d.airconditioner
-{
-    private:
+//     public:
+//         TemperatureResource(string uri, vector<string> rt, vector<string> itf)
+//             : Resource(uri, rt, itf)
+//         {
+//             m_temperature = 0;
+//             m_range = "";
+//             m_units = "";
+//             m_representation.setValue("temperature", m_temperature);
+//             m_representation.setValue("range", m_range);
+//             m_representation.setValue("units", m_units);
+//         }
 
-    public:
-        AirConditionerResource(string uri, vector<string> rt, vector<string> itf)
-            : Resource(uri, rt, itf)
-        {
+//         void setTemperatureRepresentation(OCRepresentation &rep)
+//         {
+//             int temperature;
+//             string range;
+//             int units;
 
-        }
+//             if (rep.getValue("temperature", temperature) &&
+//                 rep.getValue("range", range) &&
+//                 rep.getValue("units", units))
+//             {
+//                 m_temperature = temperature;
+//                 m_range = range;
+//                 m_units = units;
+//                 m_representation.setValue("temperature", m_temperature);
+//                 m_representation.setValue("range", m_range);
+//                 m_representation.setValue("units", m_units);
+//                 cout << "\t\t\t\t" << "temperature: " << m_temperature << endl;
+//                 cout << "\t\t\t\t" << "range: " << m_range << endl;
+//                 cout << "\t\t\t\t" << "units: " << m_units << endl;
 
-        OCEntityHandlerResult entityHandler(shared_ptr<OCResourceRequest> request)
-        {
-            cout << "\tIn Server Airconditioner entity handler:\n";
-            OCEntityHandlerResult ehResult = OC_EH_ERROR;
+//                 propagate();
+//             }
+//         }
 
-            if (request)
-            {
-                // Get the request type and request flag
-                string requestType = request->getRequestType();
-                int requestFlag = request->getRequestHandlerFlag();
+//         OCEntityHandlerResult entityHandler(shared_ptr<OCResourceRequest> request)
+//         {
+//             cout << "\tIn Server Temperature entity handler:\n";
+//             OCEntityHandlerResult ehResult = OC_EH_ERROR;
 
-                if (requestFlag & RequestHandlerFlag::RequestFlag)
-                {
-                    cout << "\t\trequestFlag : Request\n";
+//             if (request)
+//             {
+//                 // Get the request type and request flag
+//                 string requestType = request->getRequestType();
+//                 int requestFlag = request->getRequestHandlerFlag();
 
-                    // If the request type is GET
-                    if (requestType == "GET")
-                    {
-                        cout << "\t\t\trequestType : GET\n";
-                        string findRes = request->getQueryParameters().find("if")->second;
-                        if (findRes.compare(LINK_INTERFACE) == 0)
-                        {
-                            if (OC_STACK_OK == sendRepresentation(request))
-                            {
-                                ehResult = OC_EH_OK;
-                            }
-                        }
-                        else
-                        {
-                            ehResult = OC_EH_FORBIDDEN;
-                        }
-                    }
-                    else if (requestType == "PUT")
-                    {
-                        cout << "\t\t\trequestType : PUT\n";
-                        // Call these functions to prepare the response for child resources and
-                        // then send the final response using sendRoomResponse function
+//                 if (requestFlag & RequestHandlerFlag::RequestFlag)
+//                 {
+//                     cout << "\t\trequestFlag : Request\n";
 
-                        /*
-                        for (auto it = m_childResources.begin();
-                             it != m_childResources.end(); it++)
-                        {
-                            (*it)->entityHandler(request);
-                        }
+//                     // If the request type is GET
+//                     if (requestType == "GET")
+//                     {
+//                         cout << "\t\t\trequestType : GET\n";
+//                         if (OC_STACK_OK == sendRepresentation(request))
+//                         {
+//                             ehResult = OC_EH_OK;
+//                         }
+//                     }
+//                     else if (requestType == "PUT")
+//                     {
+//                         cout << "\t\t\trequestType : PUT\n";
+//                         // PUT requeist operations
+//                     }
+//                     else if (requestType == "POST")
+//                     {
+//                         cout << "\t\t\trequestType : POST\n";
+//                         // POST request operations
+//                         OCRepresentation    rep = request->getResourceRepresentation();
+//                         setTemperatureRepresentation(rep);
 
-                        if (OC_STACK_OK == sendRepresentation(request))
-                        {
-                            ehResult = OC_EH_OK;
-                        }
-                        */
-                    }
-                    else if (requestType == "POST")
-                    {
-                        // POST request operations
-                    }
-                    else if (requestType == "DELETE")
-                    {
-                        // DELETE request operations
-                    }
-                }
+//                         if (OC_STACK_OK == sendRepresentation(request))
+//                         {
+//                             ehResult = OC_EH_OK;
+//                         }
+//                     }
+//                     else if (requestType == "DELETE")
+//                     {
+//                         cout << "\t\t\trequestType : DELETE\n";
+//                         // DELETE request operations
+//                     }
+//                 }
 
-                if (requestFlag & RequestHandlerFlag::ObserverFlag)
-                {
-                    cout << "\t\trequestFlag : Observer\n";
-                }
-            }
-            else
-            {
-                cout << "Request invalid" << endl;
-            }
+//                 if (requestFlag & RequestHandlerFlag::ObserverFlag)
+//                 {
+//                     cout << "\t\trequestFlag : Observer\n";
 
-            return ehResult;
-        }
-};
+//                     ObservationInfo observationInfo = request->getObservationInfo();
+//                     if (ObserveAction::ObserveRegister == observationInfo.action)
+//                     {
+//                         m_interestedObservers.push_back(observationInfo.obsId);
+//                     }
+//                     else if (ObserveAction::ObserveUnregister == observationInfo.action)
+//                     {
+//                         m_interestedObservers.erase(remove(
+//                                                         m_interestedObservers.begin(),
+//                                                         m_interestedObservers.end(),
+//                                                         observationInfo.obsId),
+//                                                     m_interestedObservers.end());
+//                     }
+//                 }
+//             }
+//             else
+//             {
+//                 cout << "Request invalid" << endl;
+//             }
 
-class FirmwareResource : public Resource // x.org.iotivity.firmware
-{
-    private:
-        string  m_currentversion;
-        int     m_state;    //0: Idle, 1: Downloading, 2: Downloaded, 3: Updating
-        int     m_result;   //0: Initial, 1: success, 2: not enough space, 3: out of ram, 4: connection lost, 5: invalid binary, 6: invalid uri, 7: update failed, 8: unsupport protocol
-        string  m_packageuri;
-        string  m_newversion;
-        int     m_updatemethod; //0: download immediatly, 1: user trigger download
+//             return ehResult;
+//         }
+// };
 
-        bool    m_update;
+// class AirConditionerResource : public Resource // oic.d.airconditioner
+// {
+//     private:
 
-    public:
-        FirmwareResource(string uri, vector<string> rt, vector<string> itf)
-            : Resource(uri, rt, itf)
-        {
-            m_currentversion = "My Custom Binary Version 0";
-            m_state = 0;
-            m_result = 0;
-            m_packageuri = "";
-            m_newversion = "";
-            m_updatemethod = 0;
+//     public:
+//         AirConditionerResource(string uri, vector<string> rt, vector<string> itf)
+//             : Resource(uri, rt, itf)
+//         {
 
-            m_representation.setValue<string>("currentversion", m_currentversion);
-            m_representation.setValue<int>("state", m_state);
-            m_representation.setValue<int>("result", m_result);
+//         }
 
-            m_representation.setValue<string>("packageuri", m_packageuri);
-            m_representation.setValue<string>("newversion", m_newversion);
-            m_representation.setValue<int>("updatemethod", m_updatemethod);
-        }
+//         OCEntityHandlerResult entityHandler(shared_ptr<OCResourceRequest> request)
+//         {
+//             cout << "\tIn Server Airconditioner entity handler:\n";
+//             OCEntityHandlerResult ehResult = OC_EH_ERROR;
 
-        void onUpdateFirmware()
-        {
-            cout << "***Starting firmware update***" << endl;
+//             if (request)
+//             {
+//                 // Get the request type and request flag
+//                 string requestType = request->getRequestType();
+//                 int requestFlag = request->getRequestHandlerFlag();
 
-            sleep(1);
-            cout << "***Downloading image...***" << endl;
+//                 if (requestFlag & RequestHandlerFlag::RequestFlag)
+//                 {
+//                     cout << "\t\trequestFlag : Request\n";
 
-            //Downloading, Initial
-            m_representation.setValue<int>("state", 1);
-            m_representation.setValue<int>("result", 0);
-            propagate();
+//                     // If the request type is GET
+//                     if (requestType == "GET")
+//                     {
+//                         cout << "\t\t\trequestType : GET\n";
+//                         string findRes = request->getQueryParameters().find("if")->second;
+//                         if (findRes.compare(LINK_INTERFACE) == 0)
+//                         {
+//                             if (OC_STACK_OK == sendRepresentation(request))
+//                             {
+//                                 ehResult = OC_EH_OK;
+//                             }
+//                         }
+//                         else
+//                         {
+//                             ehResult = OC_EH_FORBIDDEN;
+//                         }
+//                     }
+//                     else if (requestType == "PUT")
+//                     {
+//                         cout << "\t\t\trequestType : PUT\n";
+//                         // Call these functions to prepare the response for child resources and
+//                         // then send the final response using sendRoomResponse function
 
-            sleep(5);
-            cout << "***Image downloaded, checking...***" << endl;
+//                         /*
+//                         for (auto it = m_childResources.begin();
+//                              it != m_childResources.end(); it++)
+//                         {
+//                             (*it)->entityHandler(request);
+//                         }
 
-            //Downloaded
-            m_representation.setValue<int>("state", 2);
-            propagate();
+//                         if (OC_STACK_OK == sendRepresentation(request))
+//                         {
+//                             ehResult = OC_EH_OK;
+//                         }
+//                         */
+//                     }
+//                     else if (requestType == "POST")
+//                     {
+//                         // POST request operations
+//                     }
+//                     else if (requestType == "DELETE")
+//                     {
+//                         // DELETE request operations
+//                     }
+//                 }
 
-            sleep(1);
-            cout << "***Updating image...***" << endl;
+//                 if (requestFlag & RequestHandlerFlag::ObserverFlag)
+//                 {
+//                     cout << "\t\trequestFlag : Observer\n";
+//                 }
+//             }
+//             else
+//             {
+//                 cout << "Request invalid" << endl;
+//             }
 
-            //Updating
-            m_representation.setValue<int>("state", 3);
-            propagate();
+//             return ehResult;
+//         }
+// };
 
-            sleep(5);
+// class FirmwareResource : public Resource // x.org.iotivity.firmware
+// {
+//     private:
+//         string  m_currentversion;
+//         int     m_state;    //0: Idle, 1: Downloading, 2: Downloaded, 3: Updating
+//         int     m_result;   //0: Initial, 1: success, 2: not enough space, 3: out of ram, 4: connection lost, 5: invalid binary, 6: invalid uri, 7: update failed, 8: unsupport protocol
+//         string  m_packageuri;
+//         string  m_newversion;
+//         int     m_updatemethod; //0: download immediatly, 1: user trigger download
 
-            //Idle, success
-            m_representation.setValue<int>("state", 0);
-            m_representation.setValue<int>("result", 1);
+//         bool    m_update;
 
-            m_newversion = m_representation.getValue<string>("newversion");
-            m_currentversion = m_representation.getValue<string>("currentversion");
+//     public:
+//         FirmwareResource(string uri, vector<string> rt, vector<string> itf)
+//             : Resource(uri, rt, itf)
+//         {
+//             m_currentversion = "My Custom Binary Version 0";
+//             m_state = 0;
+//             m_result = 0;
+//             m_packageuri = "";
+//             m_newversion = "";
+//             m_updatemethod = 0;
 
-            cout << "***Update completed from " << m_currentversion << " to " << m_newversion << "***" << endl;
+//             m_representation.setValue<string>("currentversion", m_currentversion);
+//             m_representation.setValue<int>("state", m_state);
+//             m_representation.setValue<int>("result", m_result);
 
-            m_representation.setValue<string>("currentversion", m_newversion);
-            m_representation.setValue<string>("newversion", "");
-            m_representation.setValue<string>("packageuri", "");
-            propagate();
+//             m_representation.setValue<string>("packageuri", m_packageuri);
+//             m_representation.setValue<string>("newversion", m_newversion);
+//             m_representation.setValue<int>("updatemethod", m_updatemethod);
+//         }
 
-            sleep(2);
-            m_representation.setValue<int>("result", 0);
-            propagate();
-        }
+//         void onUpdateFirmware()
+//         {
+//             cout << "***Starting firmware update***" << endl;
 
-        static void *_worker(void *pArg)
-        {
-            FirmwareResource *pThread = (FirmwareResource *)pArg;
-            pThread->onUpdateFirmware();
-            // the function must return something - NULL will do
-            return NULL;
-        }
+//             sleep(1);
+//             cout << "***Downloading image...***" << endl;
 
-        void setFirmwareRepresentation(OCRepresentation &rep)
-        {
-            bool hasUpdates = false;
+//             //Downloading, Initial
+//             m_representation.setValue<int>("state", 1);
+//             m_representation.setValue<int>("result", 0);
+//             propagate();
 
-            if (rep.getValue<string>("packageuri", m_packageuri))
-            {
-                cout << "\t\t\t\t" << "packageuri: " << m_packageuri << endl;
-                m_representation.setValue<string>("packageuri", m_packageuri);
-                hasUpdates = true;
-            }
+//             sleep(5);
+//             cout << "***Image downloaded, checking...***" << endl;
 
-            if (rep.getValue<string>("newversion", m_newversion))
-            {
-                cout << "\t\t\t\t" << "newversion: " << m_newversion << endl;
-                m_representation.setValue<string>("newversion", m_newversion);
-                hasUpdates = true;
-            }
+//             //Downloaded
+//             m_representation.setValue<int>("state", 2);
+//             propagate();
 
-            if (rep.getValue<int>("updatemethod", m_updatemethod))
-            {
-                cout << "\t\t\t\t" << "updatemethod: " << m_updatemethod << endl;
-                m_representation.setValue<int>("updatemethod", m_updatemethod);
-                hasUpdates = true;
-            }
+//             sleep(1);
+//             cout << "***Updating image...***" << endl;
 
-            if (rep.getValue<bool>("update", m_update))
-            {
-                cout << "\t\t\t\t" << "update: " << m_update << endl;
-                hasUpdates = true;
+//             //Updating
+//             m_representation.setValue<int>("state", 3);
+//             propagate();
 
-                pthread_t hThread;
-                //Start temp thread to manage update simulator
-                pthread_create(&hThread, NULL, (void *(*)(void *))_worker, (void *)this);
-            }
+//             sleep(5);
 
-            if (hasUpdates)
-            {
-                propagate();
-            }
-        }
+//             //Idle, success
+//             m_representation.setValue<int>("state", 0);
+//             m_representation.setValue<int>("result", 1);
 
-        OCEntityHandlerResult entityHandler(shared_ptr<OCResourceRequest> request)
-        {
-            cout << "\tIn Server Firmware entity handler:\n";
-            OCEntityHandlerResult ehResult = OC_EH_ERROR;
+//             m_newversion = m_representation.getValue<string>("newversion");
+//             m_currentversion = m_representation.getValue<string>("currentversion");
 
-            if (request)
-            {
-                // Get the request type and request flag
-                string requestType = request->getRequestType();
-                int requestFlag = request->getRequestHandlerFlag();
+//             cout << "***Update completed from " << m_currentversion << " to " << m_newversion << "***" << endl;
 
-                if (requestFlag & RequestHandlerFlag::RequestFlag)
-                {
-                    cout << "\t\trequestFlag : Request\n";
+//             m_representation.setValue<string>("currentversion", m_newversion);
+//             m_representation.setValue<string>("newversion", "");
+//             m_representation.setValue<string>("packageuri", "");
+//             propagate();
 
-                    // If the request type is GET
-                    if (requestType == "GET")
-                    {
-                        cout << "\t\t\trequestType : GET\n";
-                        if (OC_STACK_OK == sendRepresentation(request))
-                        {
-                            ehResult = OC_EH_OK;
-                        }
-                    }
-                    else if (requestType == "PUT")
-                    {
-                        cout << "\t\t\trequestType : PUT\n";
-                        // PUT requeist operations
-                    }
-                    else if (requestType == "POST")
-                    {
-                        cout << "\t\t\trequestType : POST\n";
-                        // POST request operations
-                        OCRepresentation    rep = request->getResourceRepresentation();
-                        setFirmwareRepresentation(rep);
+//             sleep(2);
+//             m_representation.setValue<int>("result", 0);
+//             propagate();
+//         }
 
-                        if (OC_STACK_OK == sendRepresentation(request))
-                        {
-                            ehResult = OC_EH_OK;
-                        }
-                    }
-                    else if (requestType == "DELETE")
-                    {
-                        cout << "\t\t\trequestType : DELETE\n";
-                        // DELETE request operations
-                    }
-                }
+//         static void *_worker(void *pArg)
+//         {
+//             FirmwareResource *pThread = (FirmwareResource *)pArg;
+//             pThread->onUpdateFirmware();
+//             // the function must return something - NULL will do
+//             return NULL;
+//         }
 
-                if (requestFlag & RequestHandlerFlag::ObserverFlag)
-                {
-                    cout << "\t\trequestFlag : Observer\n";
+//         void setFirmwareRepresentation(OCRepresentation &rep)
+//         {
+//             bool hasUpdates = false;
 
-                    ObservationInfo observationInfo = request->getObservationInfo();
-                    if (ObserveAction::ObserveRegister == observationInfo.action)
-                    {
-                        m_interestedObservers.push_back(observationInfo.obsId);
-                    }
-                    else if (ObserveAction::ObserveUnregister == observationInfo.action)
-                    {
-                        m_interestedObservers.erase(remove(
-                                                        m_interestedObservers.begin(),
-                                                        m_interestedObservers.end(),
-                                                        observationInfo.obsId),
-                                                    m_interestedObservers.end());
-                    }
-                }
-            }
-            else
-            {
-                cout << "Request invalid" << endl;
-            }
+//             if (rep.getValue<string>("packageuri", m_packageuri))
+//             {
+//                 cout << "\t\t\t\t" << "packageuri: " << m_packageuri << endl;
+//                 m_representation.setValue<string>("packageuri", m_packageuri);
+//                 hasUpdates = true;
+//             }
 
-            return ehResult;
-        }
-};
+//             if (rep.getValue<string>("newversion", m_newversion))
+//             {
+//                 cout << "\t\t\t\t" << "newversion: " << m_newversion << endl;
+//                 m_representation.setValue<string>("newversion", m_newversion);
+//                 hasUpdates = true;
+//             }
+
+//             if (rep.getValue<int>("updatemethod", m_updatemethod))
+//             {
+//                 cout << "\t\t\t\t" << "updatemethod: " << m_updatemethod << endl;
+//                 m_representation.setValue<int>("updatemethod", m_updatemethod);
+//                 hasUpdates = true;
+//             }
+
+//             if (rep.getValue<bool>("update", m_update))
+//             {
+//                 cout << "\t\t\t\t" << "update: " << m_update << endl;
+//                 hasUpdates = true;
+
+//                 pthread_t hThread;
+//                 //Start temp thread to manage update simulator
+//                 pthread_create(&hThread, NULL, (void *(*)(void *))_worker, (void *)this);
+//             }
+
+//             if (hasUpdates)
+//             {
+//                 propagate();
+//             }
+//         }
+
+//         OCEntityHandlerResult entityHandler(shared_ptr<OCResourceRequest> request)
+//         {
+//             cout << "\tIn Server Firmware entity handler:\n";
+//             OCEntityHandlerResult ehResult = OC_EH_ERROR;
+
+//             if (request)
+//             {
+//                 // Get the request type and request flag
+//                 string requestType = request->getRequestType();
+//                 int requestFlag = request->getRequestHandlerFlag();
+
+//                 if (requestFlag & RequestHandlerFlag::RequestFlag)
+//                 {
+//                     cout << "\t\trequestFlag : Request\n";
+
+//                     // If the request type is GET
+//                     if (requestType == "GET")
+//                     {
+//                         cout << "\t\t\trequestType : GET\n";
+//                         if (OC_STACK_OK == sendRepresentation(request))
+//                         {
+//                             ehResult = OC_EH_OK;
+//                         }
+//                     }
+//                     else if (requestType == "PUT")
+//                     {
+//                         cout << "\t\t\trequestType : PUT\n";
+//                         // PUT requeist operations
+//                     }
+//                     else if (requestType == "POST")
+//                     {
+//                         cout << "\t\t\trequestType : POST\n";
+//                         // POST request operations
+//                         OCRepresentation    rep = request->getResourceRepresentation();
+//                         setFirmwareRepresentation(rep);
+
+//                         if (OC_STACK_OK == sendRepresentation(request))
+//                         {
+//                             ehResult = OC_EH_OK;
+//                         }
+//                     }
+//                     else if (requestType == "DELETE")
+//                     {
+//                         cout << "\t\t\trequestType : DELETE\n";
+//                         // DELETE request operations
+//                     }
+//                 }
+
+//                 if (requestFlag & RequestHandlerFlag::ObserverFlag)
+//                 {
+//                     cout << "\t\trequestFlag : Observer\n";
+
+//                     ObservationInfo observationInfo = request->getObservationInfo();
+//                     if (ObserveAction::ObserveRegister == observationInfo.action)
+//                     {
+//                         m_interestedObservers.push_back(observationInfo.obsId);
+//                     }
+//                     else if (ObserveAction::ObserveUnregister == observationInfo.action)
+//                     {
+//                         m_interestedObservers.erase(remove(
+//                                                         m_interestedObservers.begin(),
+//                                                         m_interestedObservers.end(),
+//                                                         observationInfo.obsId),
+//                                                     m_interestedObservers.end());
+//                     }
+//                 }
+//             }
+//             else
+//             {
+//                 cout << "Request invalid" << endl;
+//             }
+
+//             return ehResult;
+//         }
+// };
 
 condition_variable g_callbackLock;
 string             g_uid;
