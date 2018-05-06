@@ -28,6 +28,14 @@ using namespace std;
 
 string              g_host;
 
+static void turn_servo_motor(bool val) {
+    char cmd[32];
+    memset(cmd, 0, sizeof(cmd));
+    snprintf(cmd, 31, "turn %s", val ? "`cat /on`" : "`cat /off`");
+    int ret = system(cmd);
+    (void)ret;
+}
+
 class Resource
 {
     protected:
@@ -234,7 +242,7 @@ class BinarySwitchResource : public Resource //oic.r.switch.binary
                 m_switch = _switch;
                 m_representation.setValue("switch", m_switch);
                 cout << "\t\t\t\t" << "switch: " << m_switch << endl;
-
+                turn_servo_motor(m_switch);
                 propagate();
             }
         }
