@@ -111,6 +111,15 @@ aircon_controller_src = ['airconditioner/aircon_controller.cpp']
 cc_sample_app_env.Program('aircon_controller', aircon_controller_src)
 
 ######################################################################
+# Einstrasse's Project
+######################################################################
+local_server_src = ['einstrasse/local_server.cpp']
+cc_sample_app_env.Program('local_server', local_server_src)
+
+remote_client_src = ['einstrasse/remote_client.cpp']
+cc_sample_app_env.Program('remote_client', remote_client_src)
+
+######################################################################
 # Samples for message queue
 ######################################################################
 mqOption = env.get('WITH_MQ')
