@@ -50,3 +50,10 @@ sw_serial_test.cpp 소스코드를 아두이노에서 동작시키고, 2번핀(�
 
 ##### 전등 On = 각도 88    
 ##### 전등 Off = 각도 105
+
+## 4. 기타 Trouble Shooting
+라즈베리파이2에서 3로 변경하는 과정에서 UART 통신이 제대로 되지 않았다.
+[참고 글](https://www.raspberrypi.org/forums/viewtopic.php?t=198158)
+
+I can enable UART adding dtoverlay=pi3-disable-bt to config.txt
+즉 ```/boot/config.txt```에 ```dtoverlay=pi3-disable-bt```라는 구문을 추가하면 해결된다.
